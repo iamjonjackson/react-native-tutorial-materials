@@ -2112,7 +2112,7 @@ app/
     setTheme(savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : systemTheme);
   }
   function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
     setTheme(nextTheme);
     try { localStorage.setItem(THEME_KEY, nextTheme); } catch (_) {}
