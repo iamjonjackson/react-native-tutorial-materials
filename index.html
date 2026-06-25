@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React Native Workshop · Digital & Technology Solutions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0F1117;
+      --surface:   #1A1D27;
+      --surface2:  #22263A;
+      --accent:    #FF6B6B;
+      --accent2:   #FFB347;
+      --green:     #4ECDC4;
+      --text:      #FFFFFF; 
+      --muted:     #adb2be;
+      --border:    #2A2D3E;
+      --code-bg:   #13151F;
+      --sidebar-w: 260px;
+      --font-head: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    #sidebar-logo {
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    #sidebar-logo .logo-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    #sidebar-logo h1 {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    #sidebar-progress {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .progress-bar-track {
+      background: var(--border);
+      border-radius: 99px;
+      height: 3px;
+      width: 100%;
+    }
+    .progress-bar-fill {
+      background: var(--accent);
+      height: 3px;
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: var(--font-mono);
+    }
+
+    #sidebar-nav {
+      flex: 1;
+      padding: 8px 0 20px;
+      overflow-y: auto;
+    }
+
+    .nav-group-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 16px 20px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 20px;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: var(--surface2); }
+    .nav-item.active {
+      border-left-color: var(--accent);
+      background: rgba(255,107,107,0.08);
+    }
+    .nav-item.active .nav-label { color: var(--text); }
+
+    .nav-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .nav-item.active .nav-dot {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .nav-label {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    .nav-timing {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+    .nav-item.active .nav-timing { color: var(--accent); opacity: 0.7; }
+
+    #sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+    #sidebar-footer a {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #sidebar-footer a:hover { color: var(--text); }
+
+    /* ── MAIN CONTENT ── */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      width: calc(100% - var(--sidebar-w));
+    }
+
+    /* ── SECTIONS ── */
+    .slide {
+      min-height: 100vh;
+      padding: 60px 64px 60px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .slide:last-child { border-bottom: none; }
+
+    /* section type colours */
+    .slide[data-type="theory"] { border-left: 3px solid var(--accent); }
+    .slide[data-type="demo"]   { border-left: 3px solid var(--green); }
+    .slide[data-type="hands-on"] { border-left: 3px solid var(--accent2); }
+    .slide[data-type="hackathon"] { border-left: 3px solid #B47FFF; }
+    .slide[data-type="hero"]   { border-left: none; }
+
+    .slide-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+     .type-pill {
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .type-pill.theory    { background: rgba(255,107,107,0.15); color: var(--accent); }
+    .type-pill.demo      { background: rgba(78,205,196,0.15);  color: var(--green); }
+    .type-pill.hands-on  { background: rgba(255,179,71,0.15);  color: var(--accent2); }
+    .type-pill.hackathon { background: rgba(180,127,255,0.15); color: #B47FFF; }
+
+    .slide-timing {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .slide h2 {
+      font-family: var(--font-head);
+      font-size: clamp(28px, 3.5vw, 48px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .slide h3 {
+      font-family: var(--font-head);
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: var(--text);
+    }
+    .slide .subtitle {
+      font-size: 17px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 680px;
+      line-height: 1.6;
+    }
+
+    /* hero slide */
+    #slide-hero {
+      background: radial-gradient(ellipse at 60% 40%, rgba(255,107,107,0.07) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(78,205,196,0.05) 0%, transparent 50%),
+                  var(--bg);
+      justify-content: center;
+    }
+    .hero-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    #slide-hero h2 {
+      font-size: clamp(36px, 5vw, 72px);
+      line-height: 1.05;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--text) 60%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .hero-meta-item .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .hero-meta-item .value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── CONTENT ELEMENTS ── */
+    p { margin-bottom: 14px; color: var(--text); max-width: 720px; }
+    p:last-child { margin-bottom: 0; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { color: var(--text); font-weight: 600; }
+
+    /* Approach cards */
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .approach-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .approach-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .approach-card.wrap::before  { background: var(--green); }
+    .approach-card.hybrid::before { background: var(--accent); }
+    .approach-card.native::before { background: var(--accent2); }
+
+    .approach-card h4 {
+      font-family: var(--font-head);
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .approach-card .examples {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .approach-card p { font-size: 14px; margin-bottom: 0; color: var(--muted); }
+
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .pros, .cons {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .pros .heading { font-size: 10px; color: var(--green); font-family: var(--font-mono); letter-spacing: 0.1em; margin-bottom: 6px; text-transform: uppercase; }
+    .cons .heading { font-size: 10px; color: var(--accent); font-family: var(--font-mono); letter-spacing: 0.1em; margin-bottom: 6px; text-transform: uppercase; }
+    .pros ul, .cons ul { padding-left: 14px; }
+    .pros li, .cons li { font-size: 12.5px; color: var(--muted); margin-bottom: 3px; }
+
+    /* Decision axes */
+    .axes-row {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .axis-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Distribution cards */
+    .dist-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .dist-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .dist-card h4 {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dist-card .cost {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .dist-card .cost-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .dist-card p { font-size: 13.5px; color: var(--muted); }
+
+    /* Tooling table */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .tool-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .tool-card h4 {
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+    .tool-card p { font-size: 13px; color: var(--muted); margin: 0; }
+    .tool-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    .tool-tag.recommended { background: rgba(255,107,107,0.15); color: var(--accent); }
+    .tool-tag.learning    { background: rgba(78,205,196,0.15); color: var(--green); }
+    .tool-tag.advanced    { background: rgba(255,179,71,0.15); color: var(--accent2); }
+
+    /* Diff table */
+    .diff-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    .diff-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--surface2);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .diff-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .diff-table tr:last-child td { border-bottom: none; }
+    .diff-table td:first-child { color: var(--muted); font-family: var(--font-mono); font-size: 13px; }
+    .diff-table .web  { color: var(--muted); }
+    .diff-table .rn   { color: var(--text); font-weight: 500; }
+
+    /* Code block */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      position: relative;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: #c9d1d9;
+      white-space: pre;
+    }
+    .code-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .kw  { color: #FF7B9B; }
+    .fn  { color: #79C0FF; }
+    .str { color: #A5D6FF; }
+    .cmt { color: #8B949E; font-style: italic; }
+    .tag { color: #7EE787; }
+    .attr{ color: #FFB347; }
+
+    /* Tooling path cards */
+    .path-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .path-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      position: relative;
+    }
+    .path-card.recommended-path {
+      border-color: var(--accent);
+      background: rgba(255,107,107,0.04);
+    }
+    .path-badge {
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .path-card h4 {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .path-card .path-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .path-card p { font-size: 13px; color: var(--muted); }
+    .path-card ul { padding-left: 14px; margin-top: 8px; }
+    .path-card li { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .path-card .path-note {
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: var(--code-bg);
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Checkpoint callout */
+    .checkpoint {
+      background: rgba(255,179,71,0.08);
+      border: 1px solid rgba(255,179,71,0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 24px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .checkpoint-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .checkpoint h4 {
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 4px;
+    }
+    .checkpoint p { font-size: 13.5px; color: var(--muted); margin: 0; }
+
+    /* Facilitator note */
+    .facilitator-note {
+      background: rgba(180,127,255,0.07);
+      border-left: 3px solid #B47FFF;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+    }
+    .facilitator-note .fn-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #B47FFF;
+      margin-bottom: 5px;
+    }
+    .facilitator-note p { font-size: 13.5px; color: var(--muted); margin: 0; }
+
+    /* Step list */
+    .step-list {
+      list-style: none;
+      margin: 16px 0;
+    }
+    .step-list li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-list li .step-body { flex: 1; }
+    .step-list li .step-body strong { font-size: 14px; color: var(--text); margin-bottom: 2px; }
+    .step-list li .step-body span { font-size: 13.5px; color: var(--muted); }
+
+    /* Sub-checkpoint banner */
+    .sub-cp {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin: 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sub-cp .sub-cp-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      white-space: nowrap;
+    }
+    .sub-cp p { font-size: 13px; color: var(--muted); margin: 0; }
+
+    /* Hackathon tiers */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .tier-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .tier-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      display: inline-block;
+    }
+    .tier-label.approachable  { background: rgba(78,205,196,0.15); color: var(--green); }
+    .tier-label.intermediate  { background: rgba(255,179,71,0.15); color: var(--accent2); }
+    .tier-label.ambitious     { background: rgba(255,107,107,0.15); color: var(--accent); }
+    .tier-card ul { list-style: none; padding: 0; }
+    .tier-card li {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .tier-card li:last-child { border-bottom: none; }
+    .tier-card li::before {
+      content: '→';
+      color: var(--border);
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Sources section */
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .source-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .source-item:hover { border-color: var(--accent); text-decoration: none; }
+    .source-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .source-item .src-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .source-item .src-url {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Platform demo columns */
+    .platform-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 20px 0;
+    }
+    .platform-col {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .platform-col h4 {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .platform-col ul { list-style: none; padding: 0; }
+    .platform-col li {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .platform-col li:last-child { border-bottom: none; }
+
+    /* Keyboard nav hint */
+    #keynav-hint {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    #keynav-hint:hover { opacity: 1; }
+    .key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    /* nav arrows */
+    #nav-arrows {
+      position: fixed;
+      bottom: 20px;
+      left: calc(var(--sidebar-w) + 20px);
+      display: flex;
+      gap: 8px;
+      z-index: 200;
+    }
+    .nav-arrow {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 16px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .nav-arrow:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    /* mobile toggle */
+    #sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 300;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    @media (max-width: 900px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #main { margin-left: 0; width: 100%; }
+      #sidebar-toggle { display: flex; }
+      .slide { padding: 40px 24px; }
+      .approach-grid, .path-grid, .tier-grid { grid-template-columns: 1fr; }
+      .dist-grid, .platform-cols, .source-grid, .tool-grid { grid-template-columns: 1fr; }
+      #nav-arrows { left: 16px; bottom: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    /* snack embed */
+    .snack-embed {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin: 20px 0;
+      background: var(--surface);
+    }
+    .snack-embed iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      display: block;
+    }
+
+    /* inline badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    /* two-col layout utility */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    hr.slide-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Mobile toggle -->
+<button id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation">☰</button>
+
+<!-- ── SIDEBAR ── -->
+<nav id="sidebar">
+  <div id="sidebar-logo">
+    <div class="logo-tag">DTS Apprenticeship · Workshop</div>
+    <h1>React Native with Expo</h1>
+  </div>
+
+  <div id="sidebar-progress">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">Section 1 of 13</div>
+  </div>
+
+  <div id="sidebar-nav">
+    <div class="nav-group-label">Workshop 1 · 3 hours</div>
+
+    <a class="nav-item" href="#slide-hero" onclick="closeSidebarMobile()">
+      <div class="nav-dot">★</div>
+      <div>
+        <div class="nav-label">Welcome</div>
+        <div class="nav-timing">Workshop overview</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-approaches" onclick="closeSidebarMobile()">
+      <div class="nav-dot">1</div>
+      <div>
+        <div class="nav-label">Three approaches to mobile</div>
+        <div class="nav-timing">10 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-pros-cons" onclick="closeSidebarMobile()">
+      <div class="nav-dot">2</div>
+      <div>
+        <div class="nav-label">Pros, cons & when to use each</div>
+        <div class="nav-timing">10 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-distribution" onclick="closeSidebarMobile()">
+      <div class="nav-dot">3</div>
+      <div>
+        <div class="nav-label">Publishing your app</div>
+        <div class="nav-timing">10 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-tooling" onclick="closeSidebarMobile()">
+      <div class="nav-dot">4</div>
+      <div>
+        <div class="nav-label">React Native tooling</div>
+        <div class="nav-timing">10 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-rn-vs-web" onclick="closeSidebarMobile()">
+      <div class="nav-dot">5</div>
+      <div>
+        <div class="nav-label">RN vs React DOM</div>
+        <div class="nav-timing">5 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-snack" onclick="closeSidebarMobile()">
+      <div class="nav-dot">6</div>
+      <div>
+        <div class="nav-label">Snack quick-start</div>
+        <div class="nav-timing">15 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-setup" onclick="closeSidebarMobile()">
+      <div class="nav-dot">7</div>
+      <div>
+        <div class="nav-label">Environment setup</div>
+        <div class="nav-timing">30 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-supabase" onclick="closeSidebarMobile()">
+      <div class="nav-dot">8</div>
+      <div>
+        <div class="nav-label">Supabase + Expo tutorial</div>
+        <div class="nav-timing">70 min</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-platform" onclick="closeSidebarMobile()">
+      <div class="nav-dot">9</div>
+      <div>
+        <div class="nav-label">Platform-specific behaviour</div>
+        <div class="nav-timing">20 min</div>
+      </div>
+    </a>
+
+    <div class="nav-group-label">Workshop 2 · Hackathon</div>
+
+    <a class="nav-item" href="#slide-hackathon-brief" onclick="closeSidebarMobile()">
+      <div class="nav-dot">H1</div>
+      <div>
+        <div class="nav-label">Hackathon outline</div>
+        <div class="nav-timing">2 hours</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-hackathon-ideas" onclick="closeSidebarMobile()">
+      <div class="nav-dot">H2</div>
+      <div>
+        <div class="nav-label">Ideas for inspiration</div>
+        <div class="nav-timing">Reference during build</div>
+      </div>
+    </a>
+
+    <a class="nav-item" href="#slide-sources" onclick="closeSidebarMobile()">
+      <div class="nav-dot">✦</div>
+      <div>
+        <div class="nav-label">Sources & links</div>
+        <div class="nav-timing">Reference</div>
+      </div>
+    </a>
+  </div>
+
+  <div id="sidebar-footer">
+    <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      iamjonjackson/react-native-tutorial
+    </a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main id="main">
+
+  <!-- ══════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-hero" data-type="hero" data-index="0">
+    <div class="hero-tag">Digital &amp; Technology Solutions Professional (DTSP) · Level 6 Apprenticeship</div>
+    <h2>React Native<br>with Expo &amp; Supabase</h2>
+    <p class="subtitle">Build a real mobile app from scratch, running natively on iOS and Android</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="label">Workshop 1</span>
+        <span class="value">3 hours</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Workshop 2</span>
+        <span class="value">2 hr Hackathon</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Stack</span>
+        <span class="value">Expo · Supabase · GitHub</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="label">Ideal pre-requisites</span>
+        <span class="value">Supabase familiarity, some JavaScript / React</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <a href="#slide-approaches" style="background: var(--accent); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 15px; text-decoration: none;">Start Workshop →</a>
+      <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank" style="background: var(--surface); color: var(--text); padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid var(--border);">View Starter Project on GitHub</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 1 — Three approaches
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-approaches" data-type="theory" data-index="1">
+    <div class="slide-eyebrow">
+      <span class="type-pill theory">Theory</span>
+      <span class="slide-timing">10 min</span>
+    </div>
+    <h2>Three approaches<br>to mobile development</h2>
+    <p class="subtitle"><em>"The client wants a mobile app. What do we build it with?"</em><br />Three distinct approaches.</p>
+
+
+    <div class="approach-grid">
+      <div class="approach-card wrap">
+        <h4>🌐 Web &amp; Wrap</h4>
+        <div class="examples">Next.js + Vercel + PWABuilder · Ionic WebView</div>
+        <p>A web app — HTML, CSS, JavaScript — packaged and submitted to an app store. Still running inside a browser engine under the hood. The simplest path if you already have a web app.</p>
+      </div>
+      <div class="approach-card hybrid">
+        <h4>⚡ Hybrid</h4>
+        <div class="examples">React Native · Flutter · Ionic Capacitor</div>
+        <p>JavaScript (or Dart) logic drives <strong>genuinely native UI components</strong> — not a WebView. The platform renders real iOS and Android controls. One codebase, two native apps.</p>
+      </div>
+      <div class="approach-card native">
+        <h4>🔧 Native</h4>
+        <div class="examples">Xcode + Swift · Android Studio + Kotlin</div>
+        <p>Platform-specific code, written in the platform's own language. Maximum performance and full access to every platform API. But you're maintaining two separate codebases.</p>
+      </div>
+    </div>
+
+    <p style="font-size:13px;"><span class="type-pill theory">K1</span> How organisations adapt and exploit digital technology solutions to gain a competitive advantage.</p>
+    <p style="font-size:13px;"><span class="type-pill theory">K5</span> A range of digital technology solution development techniques and tools.</p>
+
+    <div class="facilitator-note">
+      <div class="fn-label">Question</div>
+      <p>Has anyone used any of these approaches before, even in a personal project?</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 2 — Pros, cons
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-pros-cons" data-type="theory" data-index="2">
+    <div class="slide-eyebrow">
+      <span class="type-pill theory">Theory</span>
+      <span class="slide-timing">10 min</span>
+    </div>
+    <h2>Pros, cons &amp;<br>when to use each</h2>
+
+    <p class="subtitle" style="margin-bottom: 0;">Factors to consider</p>
+
+    <div class="axes-row" style="margin-bottom: 20px;">
+      <div class="axis-chip">⏱ Time to market</div>
+      <div class="axis-chip">🧑‍💻 Team skills</div>
+      <div class="axis-chip">📱 Platform fidelity</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 4px;">
+
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px;">
+        <h4 style="font-family: var(--font-head); font-size: 15px; margin-bottom: 12px;">🌐 Web &amp; Wrap</h4>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="heading">Pros</div>
+            <ul>
+              <li>Fastest if web app already exists</li>
+              <li>One team, one codebase</li>
+              <li><a href="https://www.pwabuilder.com/" target="_blank">PWABuilder</a> makes it straightforward</li>
+              <li>Minimal mobile-specific skills needed</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="heading">Cons</div>
+            <ul>
+              <li>Lacks native look or feel</li>
+              <li>Limited device API access</li>
+              <li>Animations feel "webby"</li>
+              <li>App stores may reject thin wrappers</li>
+            </ul>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--muted); margin-top: 10px; margin-bottom: 0;">✅ <strong>Best for:</strong> Content-led apps, internal tools, info apps where native feel isn't critical.</p>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px;">
+        <h4 style="font-family: var(--font-head); font-size: 15px; margin-bottom: 12px;">⚡ Hybrid (React Native)</h4>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="heading">Pros</div>
+            <ul>
+              <li>Reuses React skills team may already have</li>
+              <li>Genuinely native UI components</li>
+              <li>One codebase for iOS, Android &amp; web</li>
+              <li>Large ecosystem &amp; community</li>
+              <li>Used by Meta, Microsoft, <a href="https://shopify.engineering/five-years-of-react-native-at-shopify" target="_blank">Shopify</a></li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="heading">Cons</div>
+            <ul>
+              <li>Some native modules still require platform code</li>
+              <li>Build tooling can be complex</li>
+              <li>Debugging across the JS/native bridge</li>
+              <li>Not quite as fast as fully native</li>
+            </ul>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--muted); margin-top: 10px; margin-bottom: 0;">✅ <strong>Best for:</strong> Teams with React experience who need iOS + Android without doubling headcount. The sweet spot for many commercial projects.</p>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px;">
+        <h4 style="font-family: var(--font-head); font-size: 15px; margin-bottom: 12px;">🔧 Native (Swift / Kotlin)</h4>
+        <div class="pros-cons">
+          <div class="pros">
+            <div class="heading">Pros</div>
+            <ul>
+              <li>Best possible performance</li>
+              <li>Full access to every platform API</li>
+              <li>First to get new OS features</li>
+              <li>Largest talent pool per platform</li>
+            </ul>
+          </div>
+          <div class="cons">
+            <div class="heading">Cons</div>
+            <ul>
+              <li>Two fully independent codebases to maintain</li>
+              <li>Increased team size and cost</li>
+              <li>Requires platform-specific expertise</li>
+              <li>Longer time to market</li>
+            </ul>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--muted); margin-top: 10px; margin-bottom: 0;">✅ <strong>Best for:</strong> Apps where the UI <em>is</em> the product — camera apps, games, AR/VR, financial trading. Worth the investment when scale demands it.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 3 — Distribution
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-distribution" data-type="theory" data-index="3">
+    <div class="slide-eyebrow">
+      <span class="type-pill theory">Theory</span>
+      <span class="slide-timing">10 min</span>
+    </div>
+    <h2>Publishing your app</h2>
+    <p class="subtitle">Distribution costs and timelines can be easy to overlook...</p>
+
+    <div class="dist-grid">
+      <div class="dist-card">
+        <h4>🍎 Apple App Store</h4>
+        <div class="cost">£79 <span style="font-size: 14px; color: var(--muted)">/ year *</span></div>
+        <div class="cost-label">Apple Developer Programme</div>
+        <p>Annual subscription. Covers Xcode access, TestFlight for beta testing with up to 10,000 testers, and App Store Connect for submissions. Apple's review process typically takes <strong>1–3 days</strong>. Budget time for rejections — they happen, even to experienced developers.</p>
+      </div>
+      <div class="dist-card">
+        <h4>🤖 Google Play</h4>
+        <div class="cost">$20 <span style="font-size: 14px; color: var(--muted)">one-off *</span></div>
+        <div class="cost-label">Google Play Developer Account</div>
+        <p>A single one-time registration fee. No annual renewal, no limit on the number of apps you publish. Google's review typically takes <strong>a few hours to one day</strong>. Still possible to be rejected — read the policies carefully.</p>
+      </div>
+      <div class="dist-card">
+        <h4>🌐 PWABuilder</h4>
+        <div class="cost">Free</div>
+        <div class="cost-label">pwabuilder.com</div>
+        <p>Microsoft's open-source tool that wraps a web app or Progressive Web App into packages for the App Store, Google Play, and the Microsoft Store. Good starting point for Web &amp; Wrap projects. <a href="https://www.pwabuilder.com/" target="_blank">pwabuilder.com →</a></p>
+      </div>
+      <div class="dist-card">
+        <h4>💰 Commissions</h4>
+        <div class="cost">%</div>
+        <div class="cost-label">On paid apps &amp; digital in-app purchases</div>
+        <p>Both stores take a cut of paid apps and in-app purchases of digital goods. <strong>Free apps pay nothing</strong> beyond the developer account fee. Physical goods (e.g. buying a product in a shopping app) are typically exempt.</p>
+      </div>
+    </div>
+
+    <p>* accurate as of June 2026</p>
+
+    <div class="facilitator-note">
+      <div class="fn-label">Live demo</div>
+      <p>Open <a href="https://www.pwabuilder.com/" target="_blank">pwabuilder.com</a> and paste in a URL — show how quickly it analyses a site and offers store packages. Takes 60 seconds and makes the Web &amp; Wrap approach concrete.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 4 — Tooling
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-tooling" data-type="theory" data-index="4">
+    <div class="slide-eyebrow">
+      <span class="type-pill theory">Theory</span>
+      <span class="slide-timing">10 min</span>
+    </div>
+    <h2>React Native tooling</h2>
+    <p class="subtitle">The ecosystem has several layers. Knowing what each tool does — and when to use it — will save you hours of confusion.</p>
+
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-icon">⚡</div>
+        <div>
+          <h4>Expo</h4>
+          <p>A managed framework on top of React Native. Handles all the native build configuration so you don't have to. The recommended starting point for almost all new React Native projects.</p>
+          <span class="tool-tag recommended">Recommended</span>
+          <br><a href="https://expo.dev" target="_blank" style="font-size: 12px; color: var(--muted); font-family: var(--font-mono);">expo.dev →</a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">📱</div>
+        <div>
+          <h4>Expo Go</h4>
+          <p>A phone app (iOS &amp; Android) that lets you preview your project instantly by scanning a QR code. Perfect for learning — but limited for production-grade apps that need custom native modules.</p>
+          <span class="tool-tag learning">Learning / Dev</span>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">🪄</div>
+        <div>
+          <h4>Snack</h4>
+          <p>React Native in the browser. Write code, see it run in a web player or Expo Go — no install. Every Snack gets a shareable URL. Great for demos, experiments, and teaching.</p>
+          <span class="tool-tag learning">Zero Setup</span>
+          <br><a href="https://snack.expo.dev" target="_blank" style="font-size: 12px; color: var(--muted); font-family: var(--font-mono);">snack.expo.dev →</a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">☁️</div>
+        <div>
+          <h4>GitHub Codespaces</h4>
+          <p>A full VS Code environment running in the cloud — no local install needed. Fork a repo, open a Codespace, and you have Node, the Expo CLI, and everything else pre-configured.</p>
+          <span class="tool-tag recommended">Recommended today</span>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">🗂️</div>
+        <div>
+          <h4>Expo Router</h4>
+          <p>File-based routing for React Native and web, built on native navigation APIs. Drop a file in the <code style="font-family: var(--font-mono); font-size: 12px; background: var(--code-bg); padding: 1px 5px; border-radius: 3px;">app/</code> directory — it becomes a screen. Navigation automatically uses native patterns on each platform.</p>
+          <span class="tool-tag recommended">Today's nav approach</span>
+          <br><a href="https://docs.expo.dev/router/introduction/" target="_blank" style="font-size: 12px; color: var(--muted); font-family: var(--font-mono);">docs.expo.dev/router →</a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-icon">🚀</div>
+        <div>
+          <h4>EAS (Expo Application Services)</h4>
+          <p>Cloud builds and store submission from the terminal. When you're ready to publish, EAS compiles your app in the cloud and can submit directly to both stores. No Mac required for iOS builds.</p>
+          <span class="tool-tag advanced">When you publish</span>
+          <br><a href="https://expo.dev/eas" target="_blank" style="font-size: 12px; color: var(--muted); font-family: var(--font-mono);">expo.dev/eas →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 5 — RN vs Web
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-rn-vs-web" data-type="theory" data-index="5">
+    <div class="slide-eyebrow">
+      <span class="type-pill theory">Theory</span>
+      <span class="slide-timing">5 min</span>
+    </div>
+    <h2>React Native vs<br>React DOM</h2>
+    <p class="subtitle">If you know React for the web, you're 80% of the way there. Here's what's different.</p>
+
+    <div class="two-col">
+      <div>
+        <table class="diff-table">
+          <thead>
+            <tr>
+              <th>Concept</th>
+              <th>React (Web)</th>
+              <th>React Native</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Container</td>
+              <td class="web"><code style="font-family:var(--font-mono);font-size:12px">&lt;div&gt;</code></td>
+              <td class="rn"><code style="font-family:var(--font-mono);font-size:12px">&lt;View&gt;</code></td>
+            </tr>
+            <tr>
+              <td>Text</td>
+              <td class="web"><code style="font-family:var(--font-mono);font-size:12px">&lt;p&gt;, &lt;span&gt;, &lt;h1&gt;</code></td>
+              <td class="rn"><code style="font-family:var(--font-mono);font-size:12px">&lt;Text&gt;</code></td>
+            </tr>
+            <tr>
+              <td>Images</td>
+              <td class="web"><code style="font-family:var(--font-mono);font-size:12px">&lt;img src="…"&gt;</code></td>
+              <td class="rn"><code style="font-family:var(--font-mono);font-size:12px">&lt;Image source={…}&gt;</code></td>
+            </tr>
+            <tr>
+              <td>Input</td>
+              <td class="web"><code style="font-family:var(--font-mono);font-size:12px">&lt;input&gt;</code></td>
+              <td class="rn"><code style="font-family:var(--font-mono);font-size:12px">&lt;TextInput&gt;</code></td>
+            </tr>
+            <tr>
+              <td>Styling</td>
+              <td class="web">CSS files / modules</td>
+              <td class="rn"><code style="font-family:var(--font-mono);font-size:12px">StyleSheet.create({})</code></td>
+            </tr>
+            <tr>
+              <td>Layout</td>
+              <td class="web">Block, inline, flex</td>
+              <td class="rn">Flexbox only (default)</td>
+            </tr>
+            <tr>
+              <td>Scroll</td>
+              <td class="web">Browser scroll</td>
+              <td class="rn"><code style="font-family:var(--font-mono);font-size:12px">&lt;ScrollView&gt;</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="code-block">
+          <div class="code-label">React Native · App.tsx</div>
+          <pre><span class="kw">import</span> { <span class="fn">View</span>, <span class="fn">Text</span>, <span class="fn">StyleSheet</span> } <span class="kw">from</span> <span class="str">'react-native'</span>;
+
+<span class="kw">export default function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;View</span> <span class="attr">style</span>={styles.container}<span class="tag">&gt;</span>
+      <span class="tag">&lt;Text</span> <span class="attr">style</span>={styles.heading}<span class="tag">&gt;</span>
+        Hello, mobile!
+      <span class="tag">&lt;/Text&gt;</span>
+    <span class="tag">&lt;/View&gt;</span>
+  );
+}
+
+<span class="kw">const</span> styles = <span class="fn">StyleSheet</span>.create({
+  container: {
+    flex: <span class="str">1</span>,
+    alignItems: <span class="str">'center'</span>,
+    justifyContent: <span class="str">'center'</span>,
+  },
+  heading: {
+    fontSize: <span class="str">24</span>,
+    fontWeight: <span class="str">'bold'</span>,
+  },
+});</pre>
+        </div>
+        <p style="font-size: 13px; color: var(--muted);">The component model, hooks, state, props — all identical to React on the web. The primitives are just different.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 6 — Snack
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-snack" data-type="demo" data-index="6">
+    <div class="slide-eyebrow">
+      <span class="type-pill demo">Demo</span>
+      <span class="slide-timing">15 min</span>
+    </div>
+    <h2>Snack quick-start</h2>
+    <p class="subtitle">Zero setup. Write React Native in the browser and see it run instantly — on screen or on your phone via Expo Go.</p>
+
+    <ol class="step-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Open Snack</strong>
+          <span>Go to <a href="https://snack.expo.dev" target="_blank">snack.expo.dev</a> — you'll get a shareable URL instantly, no sign-in needed.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Edit App.js</strong>
+          <span>Change the text string inside <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">&lt;Text&gt;</code>, then add a <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">&lt;Button&gt;</code> below it. Watch the preview panel update instantly.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Scan the QR code</strong>
+          <span>Click "My Device" — scan the QR with your phone's camera. Open in Expo Go and your code is running natively on a real device.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Notice what's the same</strong>
+          <span>Components, hooks, props, state — all identical to React on the web. The primitives are just different.</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="checkpoint">
+      <div class="checkpoint-icon">✋</div>
+      <div>
+        <h4>Checkpoint 1</h4>
+        <p>Thumbs up in chat when you can see your change appear in the Snack preview.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 4px;">
+      <div class="snack-embed">
+        <iframe
+          src="https://snack.expo.dev/embedded?platform=web&supportedPlatforms=ios,android,web&theme=dark&preview=true&iframeId=workshop-intro"
+          allow="geolocation; camera; microphone"
+          loading="lazy"
+          title="Expo Snack — try React Native now">
+        </iframe>
+      </div>
+      <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">☝️ Live embed — edit the code right here. Or open full-screen at <a href="https://snack.expo.dev" target="_blank">snack.expo.dev</a>.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 7 — Environment setup
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-setup" data-type="hands-on" data-index="7">
+    <div class="slide-eyebrow">
+      <span class="type-pill hands-on">Hands-on</span>
+      <span class="slide-timing">30 min</span>
+    </div>
+    <h2>Environment setup</h2>
+    <p class="subtitle">Pick the path that suits you. Everyone should end up at an Expo start screen before we continue.</p>
+
+    <div class="path-grid">
+      <div class="path-card">
+        <div class="path-label">Path A · Lowest barrier</div>
+        <h4>🪄 Snack</h4>
+        <p>Stay in the browser — no setup at all.</p>
+        <ul>
+          <li>Go to <a href="https://snack.expo.dev" target="_blank">snack.expo.dev</a></li>
+          <li>Limitation: not all npm packages are available</li>
+          <li>Fine for following along today; more limited for the full Supabase tutorial</li>
+        </ul>
+        <div class="path-note">Use this if Codespaces isn't available or takes too long to spin up.</div>
+      </div>
+
+      <div class="path-card recommended-path">
+        <div class="path-badge">Recommended</div>
+        <div class="path-label">Path B · Cloud IDE</div>
+        <h4>☁️ GitHub Codespaces</h4>
+        <p>Full VS Code in your browser. No local install needed.</p>
+        <ul>
+          <li>Go to the <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">workshop repo</a> and click "use this template > create a new repository"</li>
+          <li>In your newly copied repo, click <strong>Code → Codespaces → New codespace</strong></li>
+          <li>Wait ~3 min for it to provision</li>
+          <li>In the terminal: <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo start</code></li>
+          <li>Scan the QR with Expo Go or open the web preview</li>
+        </ul>
+        <div class="path-note">⚠️ Common issues: may take some time to provision. Fall back to Snack if you are still blocked after several retries.</div>
+      </div>
+
+      <div class="path-card">
+        <div class="path-label">Path C · Local setup</div>
+        <h4>💻 VS Code (local)</h4>
+        <p>For those already set up with Node 20+ and VS Code.</p>
+        <ul>
+          <li>Clone the <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">workshop repo</a></li>
+          <li>Run <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npm install</code></li>
+          <li>Run <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo start</code></li>
+          <li>Fastest if you're already set up</li>
+        </ul>
+        <div class="path-note">If you're on Path C and happy, help your neighbours on Path B.</div>
+      </div>
+    </div>
+
+
+    <!-- TUNNELLING -->
+    <h3>How your phone connects (Tunnelling)</h3>
+
+    <div class="card">
+
+      <p>Your app runs in the cloud (Codespaces), but your phone still needs access.</p>
+
+      <div style="margin: 24px 0; padding: 16px; background: var(--surface2); border-left: 3px solid var(--accent2); border-radius: 6px;">
+        <strong style="display: block; margin-bottom: 8px;">What is tunnelling?</strong>
+        <p style="margin-bottom: 12px; color: var(--muted);">Tunnelling creates a public URL that connects your phone to your running app.</p>
+        <pre style="background: var(--code-bg); padding: 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px; overflow-x: auto; color: var(--accent2);">Phone → ngrok → Codespace → App</pre>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0;">
+        <div style="padding: 16px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="display: block; margin-bottom: 8px; color: var(--green);">✓ Why we use it</strong>
+          <ul style="font-size: 13px; margin: 0; padding-left: 20px; color: var(--muted);">
+            <li>Works on any network</li>
+            <li>No WiFi issues</li>
+            <li>Works with Codespaces</li>
+          </ul>
+        </div>
+        <div style="padding: 16px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="display: block; margin-bottom: 8px; color: var(--accent);">⚠️ Common issues</strong>
+          <ul style="font-size: 13px; margin: 0; padding-left: 20px; color: var(--muted);">
+            <li>Slow loading → normal for tunnels</li>
+            <li>QR not working → open link manually</li>
+            <li>Fails → restart with tunnel mode</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class="checkpoint">
+      <div class="checkpoint-icon">✋</div>
+      <div>
+        <h4>Checkpoint 2</h4>
+        <p>Drop a message in chat when you're at the Expo start screen, whichever path you took.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 8 — Supabase Tutorial
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-supabase" data-type="hands-on" data-index="8">
+    <div class="slide-eyebrow">
+      <span class="type-pill hands-on">Hands-on</span>
+      <span class="slide-timing">70 min</span>
+    </div>
+    <h2>Supabase + Expo<br>user management app</h2>
+    <p class="subtitle">Build a real app with Auth, a Postgres database, and file storage — all features you've used on the web, now running natively on your phone.</p>
+
+    <p style="font-size:13px; margin-bottom:30px"><span class="type-pill theory">S4</span> Initiate, design, code, test and debug a software component for a digital and technology solution.</p>
+
+    <p>Follow the official tutorial: <a href="https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native" target="_blank">supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native →</a></p>
+
+    <hr class="slide-divider">
+
+    <div class="sub-cp">
+      <span class="sub-cp-label">Phase 1 · ~20 min</span>
+      <p>Project setup — Supabase project, SQL schema, API keys, Supabase client config</p>
+    </div>
+
+    <ol class="step-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Create a new Supabase project</strong>
+          <span>Head to <a href="https://supabase.com/dashboard" target="_blank">supabase.com/dashboard</a> → New project. Choose a strong database password and save it somewhere.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Run the starter SQL</strong>
+          <span>In the Supabase dashboard, go to <strong>SQL Editor</strong> → <strong>Quickstarts</strong> → <strong>User Management Starter</strong> This creates the <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">profiles</code> table with Row Level Security already configured.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Copy your API keys</strong>
+          <span>Go to <strong>Project Settings → API</strong>. Copy the <strong>Project URL</strong> and the <strong>anon (publishable) key</strong>. You'll need these in your <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">.env</code> file.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>Install dependencies</strong>
+          <span>In your terminal: <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill</code></span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>Create <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">lib/supabase.ts</code></strong>
+          <span>Initialise the Supabase client with your URL and anon key. Follow the tutorial exactly for the AsyncStorage session config.</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="facilitator-note">
+      <div class="fn-label">Pause point</div>
+      <p>Make sure you have your <code style="font-family:var(--font-mono);font-size:12px">EXPO_PUBLIC_SUPABASE_URL</code> and <code style="font-family:var(--font-mono);font-size:12px">EXPO_PUBLIC_SUPABASE_ANON_KEY</code> in your <code style="font-family:var(--font-mono);font-size:12px">.env</code> file. This is a common place to get stuck — a wrong key will produce confusing errors later.</p>
+    </div>
+
+    <hr class="slide-divider">
+
+    <div class="sub-cp">
+      <span class="sub-cp-label">Phase 2 · ~25 min</span>
+      <p>Auth screens — magic link sign-in, session handling</p>
+    </div>
+
+    <ol class="step-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Build the Auth component</strong>
+          <span>An email input field and a "Send magic link" button. Call <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">supabase.auth.signInWithOtp(&#123; email &#125;)</code> on press.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Handle sessions</strong>
+          <span>Use <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">supabase.auth.onAuthStateChange()</code> in a <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">useEffect</code> to update your session state when the user clicks the magic link in their email.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Test on device</strong>
+          <span>Enter an email address in Expo Go. Check your inbox — the magic link should arrive within seconds. Tap it and confirm the session fires.</span>
+        </div>
+      </li>
+    </ol>
+
+    <hr class="slide-divider">
+
+    <div class="sub-cp">
+      <span class="sub-cp-label">Phase 3 · ~25 min</span>
+      <p>Profile screen and avatar upload</p>
+    </div>
+
+    <ol class="step-list">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Build the Account component</strong>
+          <span>Fetch the user's row from the <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">profiles</code> table using their user ID. Display username, website, full name fields with a save button.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>Add avatar upload</strong>
+          <span>The <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">Avatar</code> component uses Expo's image picker to select a photo, then uploads it to a Supabase Storage bucket and saves the path to the profile.</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>Test the full flow</strong>
+          <span>Sign in → view profile → update your name → upload an avatar photo. All running on a real device, backed by a real database.</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="checkpoint">
+      <div class="checkpoint-icon">✋</div>
+      <div>
+        <h4>Checkpoint 3</h4>
+        <p>If you've got a working profile screen — well done, that's the main build complete. If you're still on Auth, keep going and use this as your starting point for the hackathon.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 9 — Platform demo
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-platform" data-type="demo" data-index="9">
+    <div class="slide-eyebrow">
+      <span class="type-pill demo">Demo + Optional Code</span>
+      <span class="slide-timing">20 min</span>
+    </div>
+    <h2>Platform-specific<br>behaviour</h2>
+    <p class="subtitle">This is React Native's headline argument over a pure web app. One codebase — two genuinely native experiences.</p>
+
+    <h3>Part A — See the difference (5 min)</h3>
+
+    <div class="platform-cols">
+      <div class="platform-col">
+        <h4>🍎 iOS</h4>
+        <ul>
+          <li>Back navigation: right-swipe gesture</li>
+          <li>Navigation headers use iOS typography</li>
+          <li>Haptic feedback on interactions</li>
+          <li>Sheet modals slide up from bottom</li>
+        </ul>
+      </div>
+      <div class="platform-col">
+        <h4>🤖 Android</h4>
+        <ul>
+          <li>Back navigation: system back button / gesture</li>
+          <li>Navigation follows Material You guidelines</li>
+          <li>Ripple effects on touchable elements</li>
+          <li>Dialogs follow Android conventions</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="facilitator-note">
+      <div class="fn-label">Live demo</div>
+      <p><a href="https://snack.expo.dev/@iamjonjackson/sample-expo-project" target="_blank">Expo example on Snack →</a>. You scan the QR code on your iPhone or Android, then compare the difference with others who have a different type of device.</p>
+    </div>
+
+    <hr class="slide-divider">
+
+    <h3>Part B — Optional: add it to your own app</h3>
+    <p style="color: var(--muted); font-size: 14px;">If you've finished the Supabase tutorial, try adding platform-specific behaviour to your own codebase. If you're still finishing the tutorial, continue there instead.</p>
+
+    <div style="margin-top: 16px;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px;">
+        <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;">Step 1 · Platform.OS — quick win</div>
+        <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Add this to your <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">Account</code> screen to show which platform the app is running on:</p>
+        <div class="code-block">
+          <pre><span class="kw">import</span> { <span class="fn">Platform</span>, <span class="fn">Text</span>, <span class="fn">StyleSheet</span> } <span class="kw">from</span> <span class="str">'react-native'</span>;
+
+<span class="cmt">// Inside your component's return:</span>
+<span class="tag">&lt;Text&gt;</span>Running on: {<span class="fn">Platform</span>.OS}<span class="tag">&lt;/Text&gt;</span>
+
+<span class="cmt">// Then use it to change styles per platform:</span>
+<span class="kw">const</span> styles = <span class="fn">StyleSheet</span>.create({
+  container: {
+    paddingTop: <span class="fn">Platform</span>.OS === <span class="str">'ios'</span> ? <span class="str">20</span> : <span class="str">10</span>,
+    backgroundColor: <span class="fn">Platform</span>.OS === <span class="str">'ios'</span>
+      ? <span class="str">'#f2f2f7'</span>
+      : <span class="str">'#ffffff'</span>,
+  },
+});</pre>
+        </div>
+        <p style="font-size: 13px; color: var(--muted);">Check both iOS and Android to confirm the value changes.</p>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px;">
+        <div style="font-family: var(--font-mono); font-size: 10px; color: #B47FFF; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;">Step 2 · Tab navigation — stretch goal</div>
+        <p style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Add Expo Router tab navigation to split your app into an <strong>Account</strong> tab and a new <strong>Home</strong> tab. The key files you'll need:</p>
+        <div class="code-block">
+          <pre><span class="cmt">// File structure to create:</span>
+app/
+  _layout.tsx        <span class="cmt">← Root layout (already exists)</span>
+  (tabs)/
+    _layout.tsx      <span class="cmt">← Tab navigator config</span>
+    index.tsx        <span class="cmt">← Home tab</span>
+    account.tsx      <span class="cmt">← Move your Account screen here</span></pre>
+        </div>
+        <p style="font-size: 13px; color: var(--muted);">Follow the structure at <a href="https://docs.expo.dev/tutorial/add-navigation/" target="_blank">docs.expo.dev/tutorial/add-navigation →</a>. The tab bar will automatically use native iOS or Android styling.</p>
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-icon">✋</div>
+      <div>
+        <h4>Checkpoint 4 · Workshop 1 wrap-up</h4>
+        <ul style="font-size: 14px; color: var(--muted); padding-left: 20px; margin: 0;">
+          <li>Recap: three approaches, where React Native sits, what you've built today.</li>
+          <li>Preview: you'll be able to extend this app in the hackathon — start thinking about what you'd add.</li>
+          <li>Any questions?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       HACKATHON — Brief
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-hackathon-brief" data-type="hackathon" data-index="10">
+    <div class="slide-eyebrow">
+      <span class="type-pill hackathon">Hackathon</span>
+      <span class="slide-timing">Workshop 2 · 2 hours</span>
+    </div>
+    <h2>The challenge</h2>
+    <p class="subtitle">Extend the Supabase user management app you built in Workshop 1. Make it more impressive, more useful, or more polished — in 90 minutes.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 20px 0;">
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px;">
+        <h4 style="font-family: var(--font-head); font-size: 15px; margin-bottom: 10px;">📋 Rules</h4>
+        <ul style="list-style: none; padding: 0;">
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border);">Must use React Native / Expo</li>
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border);">Must use Supabase</li>
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border);">External libraries and docs are fair game</li>
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0;">Solo or in teams — your choice</li>
+        </ul>
+      </div>
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px;">
+        <h4 style="font-family: var(--font-head); font-size: 15px; margin-bottom: 10px;">🏆 Judged on</h4>
+        <ul style="list-style: none; padding: 0;">
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border);">Technical ambition</li>
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border);">UX and visual polish</li>
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border);">A working demo</li>
+          <li style="font-size: 14px; color: var(--muted); padding: 6px 0;">Explanation: what did you build, and why?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 14px;">
+      <h4 style="font-family: var(--font-head); font-size: 15px; margin-bottom: 10px;">⏱ Running order</h4>
+      <div style="display: flex; flex-direction: column; gap: 0;">
+        <div style="display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: baseline;">
+          <span style="font-family: var(--font-mono); font-size: 12px; color: var(--accent); min-width: 70px;">0:00–0:10</span>
+          <span style="font-size: 14px; color: var(--text);">Kick-off — recap Workshop 1, announce the challenge, confirm teams</span>
+        </div>
+        <div style="display: flex; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: baseline;">
+          <span style="font-family: var(--font-mono); font-size: 12px; color: var(--accent); min-width: 70px;">0:10–1:40</span>
+          <span style="font-size: 14px; color: var(--text);">Build — 90 minutes. 45-min check-in to gauge progress.</span>
+        </div>
+        <div style="display: flex; gap: 16px; padding: 10px 0; align-items: baseline;">
+          <span style="font-family: var(--font-mono); font-size: 12px; color: var(--accent); min-width: 70px;">1:40–2:00</span>
+          <span style="font-size: 14px; color: var(--text);">Demos — 1 minute video each. Drop links in the chat.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="facilitator-note">
+      <div class="fn-label">Demos</div>
+      <p>Share 1-minute video links in the chat. For the vote: "Drop a 🔥 against your favourite demo."</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       HACKATHON — Ideas
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-hackathon-ideas" data-type="hackathon" data-index="11">
+    <div class="slide-eyebrow">
+      <span class="type-pill hackathon">Hackathon</span>
+      <span class="slide-timing">Reference during build</span>
+    </div>
+    <h2>Inspiration ideas</h2>
+    <p class="subtitle">Not a prescriptive menu — just a starting point. The most impressive demos usually come from ideas not on this list.</p>
+
+    <div class="tier-grid">
+      <div class="tier-card">
+        <span class="tier-label approachable">Approachable</span>
+        <ul>
+          <li>Add a bio, location or website field to the profile and display it attractively</li>
+          <li>Apply a coherent visual style — custom colours, typography, a splash screen</li>
+          <li>Add proper form validation and user-friendly error messages</li>
+          <li>Implement sign-out, session persistence and a loading state properly</li>
+        </ul>
+      </div>
+      <div class="tier-card">
+        <span class="tier-label intermediate">Intermediate</span>
+        <ul>
+          <li>Add a second screen using Expo Router — e.g. a public user directory</li>
+          <li>Add a dark mode toggle using <code style="font-family:var(--font-mono);font-size:11px;background:var(--code-bg);padding:1px 4px;border-radius:3px">useColorScheme</code></li>
+          <li>Use Expo Router tab navigation to restructure the app</li>
+          <li>Integrate <a href="https://postcodes.io" target="_blank">postcodes.io</a> for UK address lookup on the profile</li>
+        </ul>
+      </div>
+      <div class="tier-card">
+        <span class="tier-label ambitious">Ambitious</span>
+        <ul>
+          <li>Supabase Realtime — live feed of profile updates</li>
+          <li>Push notifications via Expo Notifications when a profile changes</li>
+          <li>Build a "follow" feature with a new Supabase table and RLS policy</li>
+          <li>Supabase Edge Functions — server-side logic triggered from the app</li>
+        </ul>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SOURCES
+  ══════════════════════════════════════════ -->
+  <section class="slide" id="slide-sources" data-type="theory" data-index="12">
+    <div class="slide-eyebrow">
+      <span class="type-pill theory">Reference</span>
+    </div>
+    <h2>Sources &amp; links</h2>
+    <p class="subtitle">Sources and links from the workshops.</p>
+
+    <div class="source-grid">
+      <a class="source-item" href="https://supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Supabase + Expo React Native Tutorial</div>
+          <div class="src-url">supabase.com/docs/guides/getting-started/tutorials/with-expo-react-native</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://docs.expo.dev/router/introduction/" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Expo Router — Introduction</div>
+          <div class="src-url">docs.expo.dev/router/introduction</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://docs.expo.dev/tutorial/add-navigation/" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Expo Tutorial — Add Navigation</div>
+          <div class="src-url">docs.expo.dev/tutorial/add-navigation</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://docs.expo.dev/tutorial/platform-differences/" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Expo Tutorial — Platform Differences</div>
+          <div class="src-url">docs.expo.dev/tutorial/platform-differences</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://snack.expo.dev" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Expo Snack — React Native in the browser</div>
+          <div class="src-url">snack.expo.dev</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://www.pwabuilder.com/" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">PWABuilder — Wrap a web app for app stores</div>
+          <div class="src-url">pwabuilder.com</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://reactnative.dev/docs/intro-react-native-components" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">React Native — Core Components &amp; APIs</div>
+          <div class="src-url">reactnative.dev/docs/intro-react-native-components</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://expo.dev" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Expo — Home</div>
+          <div class="src-url">expo.dev</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://expo.dev/eas" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">EAS — Expo Application Services</div>
+          <div class="src-url">expo.dev/eas</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Workshop Repo (GitHub)</div>
+          <div class="src-url">github.com/iamjonjackson/react-native-tutorial</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://postcodes.io" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Postcodes.io — Free UK postcode API</div>
+          <div class="src-url">postcodes.io</div>
+        </div>
+      </a>
+      <a class="source-item" href="https://developer.apple.com/programs/" target="_blank">
+        <div class="source-dot"></div>
+        <div>
+          <div class="src-label">Apple Developer Programme — £79/year</div>
+          <div class="src-url">developer.apple.com/programs</div>
+        </div>
+      </a>
+    </div>
+
+    <div style="margin-top: 32px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;">
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">This workshop site</div>
+      <p style="font-size: 14px; color: var(--muted); margin: 0;">Published at <a href="https://iamjonjackson.github.io/react-native-tutorial-materials" target="_blank">iamjonjackson.github.io/react-native-tutorial-materials</a> · Starter project source code at <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">github.com/iamjonjackson/react-native-tutorial</a></p>
+    </div>
+  </section>
+
+</main>
+
+<!-- nav arrows -->
+<div id="nav-arrows">
+  <div class="nav-arrow" id="prevBtn" onclick="navigateSlide(-1)" title="Previous section">↑</div>
+  <div class="nav-arrow" id="nextBtn" onclick="navigateSlide(1)" title="Next section">↓</div>
+</div>
+
+<div id="keynav-hint">
+  <span class="key">↑</span><span class="key">↓</span> or <span class="key">PgUp</span><span class="key">PgDn</span> to navigate
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const navItems = Array.from(document.querySelectorAll('.nav-item'));
+  const progressFill = document.getElementById('progressFill');
+  const progressLabel = document.getElementById('progressLabel');
+  let currentIndex = 0;
+
+  // ── Intersection Observer for active nav tracking ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
+        const idx = parseInt(entry.target.dataset.index);
+        if (!isNaN(idx)) updateNav(idx);
+      }
+    });
+  }, { threshold: 0.4 });
+
+  slides.forEach(slide => observer.observe(slide));
+
+  function updateNav(idx) {
+    currentIndex = idx;
+    navItems.forEach(item => item.classList.remove('active'));
+    const activeItem = navItems.find(item => {
+      const href = item.getAttribute('href');
+      return slides[idx] && href === '#' + slides[idx].id;
+    });
+    if (activeItem) {
+      activeItem.classList.add('active');
+      activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+    const pct = Math.round((idx / (slides.length - 1)) * 100);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = `Section ${idx + 1} of ${slides.length}`;
+  }
+
+  // ── Keyboard navigation ──
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      e.preventDefault();
+      navigateSlide(1);
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      e.preventDefault();
+      navigateSlide(-1);
+    }
+  });
+
+  function navigateSlide(dir) {
+    const next = Math.max(0, Math.min(slides.length - 1, currentIndex + dir));
+    slides[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Mobile sidebar ──
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+  function closeSidebarMobile() {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  }
+
+  // ── Hide hint after 5s ──
+  setTimeout(() => {
+    const hint = document.getElementById('keynav-hint');
+    if (hint) hint.style.opacity = '0';
+  }, 5000);
+</script>
+</body>
+</html>
