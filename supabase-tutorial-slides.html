@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supabase + Expo Tutorial · Commit by Commit</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3347;
+    --accent: #3ecf8e;
+    --accent-dim: #1a6648;
+    --text: #e2e8f0;
+    --text-muted: #8892a4;
+    --text-faint: #4a5568;
+    --add: #26a641;
+    --add-bg: #0d1f0f;
+    --rem: #e05c4b;
+    --rem-bg: #1f0d0b;
+    --note: #f6c90e;
+    --note-bg: #1f1a07;
+    --tip: #6ea8fe;
+    --tip-bg: #0d1929;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, 'Courier New', monospace;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius: 8px;
+    --slide-count: 12;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+  }
+
+  /* ─── Shell ─── */
+  #shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ─── Header ─── */
+  #header {
+    flex-shrink: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    z-index: 10;
+  }
+
+  #header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  #header-title span {
+    color: var(--accent);
+  }
+
+  /* Progress bar */
+  #progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.35s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* Commit dots */
+  #commit-dots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .commit-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    border: none;
+    padding: 0;
+  }
+  .commit-dot:hover { background: var(--text-faint); transform: scale(1.3); }
+  .commit-dot.active { background: var(--accent); transform: scale(1.25); }
+  .commit-dot.visited { background: var(--accent-dim); }
+
+  /* ─── Slide viewport ─── */
+  #viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #slide-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+    will-change: transform;
+  }
+
+  /* ─── Single slide ─── */
+  .slide {
+    min-width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 32px 40px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .slide::-webkit-scrollbar { width: 5px; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* Slide header */
+  .slide-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .slide-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .slide-sha {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent-dim);
+    background: rgba(62,207,142,0.08);
+    padding: 2px 8px;
+    border-radius: 99px;
+    text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+  }
+  .slide-sha:hover { color: var(--accent); background: rgba(62,207,142,0.15); }
+
+  .slide-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 20px;
+    max-width: 720px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 24px;
+  }
+
+  /* ─── Two-column layout on wide screens ─── */
+  .slide-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    flex: 1;
+  }
+
+  @media (max-width: 900px) {
+    .slide-body { grid-template-columns: 1fr; }
+    .slide { padding: 24px 20px 80px; }
+    .slide-title { font-size: 19px; }
+  }
+
+  .slide-left {}
+  .slide-right {}
+
+  /* Explainer */
+  .explainer {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 20px;
+    max-width: 560px;
+  }
+
+  .explainer p + p { margin-top: 12px; }
+
+  /* Notes / callouts */
+  .callout {
+    border-left: 3px solid;
+    padding: 12px 16px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .callout-note { border-color: var(--note); background: var(--note-bg); color: #e8d980; }
+  .callout-tip  { border-color: var(--tip);  background: var(--tip-bg);  color: #9dbfff; }
+  .callout-warn { border-color: var(--rem);  background: var(--rem-bg);  color: #f08070; }
+  .callout-check { border-color: var(--accent); background: var(--add-bg); color: #7ee8b8; }
+
+  .callout strong { font-weight: 700; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+
+  .callout ul, .callout ol {
+    padding-left: 18px;
+    margin-top: 6px;
+  }
+  .callout li { margin-top: 4px; }
+
+  /* ─── Diff block ─── */
+  .diff-wrap {
+    background: #0a0d14;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  .diff-file-header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .diff-file-header::before {
+    content: '📄';
+    font-size: 12px;
+  }
+
+  .diff-body {
+    overflow-x: auto;
+    max-height: 420px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .diff-body::-webkit-scrollbar { height: 4px; width: 4px; }
+  .diff-body::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .diff-line {
+    display: flex;
+    white-space: pre;
+    min-height: 20px;
+  }
+
+  .diff-gutter {
+    min-width: 36px;
+    padding: 0 8px;
+    text-align: right;
+    color: var(--text-faint);
+    user-select: none;
+    font-size: 11px;
+    line-height: 20px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+  }
+
+  .diff-content {
+    padding: 0 12px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 20px;
+  }
+
+  .diff-line.add    { background: rgba(38,166,65,0.12); }
+  .diff-line.add .diff-content { color: #7ee8a2; }
+  .diff-line.add .diff-gutter  { color: #26a641; background: rgba(38,166,65,0.08); }
+
+  .diff-line.rem    { background: rgba(224,92,75,0.12); }
+  .diff-line.rem .diff-content { color: #f0907f; }
+  .diff-line.rem .diff-gutter  { color: var(--rem); background: rgba(224,92,75,0.08); }
+
+  .diff-line.hunk   { background: rgba(110,168,254,0.07); }
+  .diff-line.hunk .diff-content { color: #6ea8fe; }
+  .diff-line.hunk .diff-gutter  { color: #4a76b8; }
+
+  /* Code snippet (non-diff) */
+  .code-block {
+    background: #0a0d14;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+    color: var(--text);
+    margin-bottom: 16px;
+    white-space: pre;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  /* ─── Footer / nav ─── */
+  #nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(15,17,23,0.98) 60%, transparent);
+    padding: 16px 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .nav-btn {
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 14px;
+    font-family: var(--sans);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    user-select: none;
+  }
+  .nav-btn:hover:not(:disabled) { background: #252e42; border-color: #3a4a65; }
+  .nav-btn:disabled { opacity: 0.2; cursor: default; }
+
+  .nav-btn .arrow { font-size: 18px; line-height: 1; }
+  .nav-btn .label { font-size: 12px; color: var(--text-muted); display: block; line-height: 1; margin-top: 2px; }
+
+  #nav-center {
+    pointer-events: all;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  #nav-center strong {
+    display: block;
+    font-size: 14px;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    margin-bottom: 2px;
+  }
+
+  /* ─── Touch / swipe hint ─── */
+  .swipe-hint {
+    display: none;
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    margin-top: 4px;
+  }
+  @media (pointer: coarse) { .swipe-hint { display: block; } }
+
+</style>
+</head>
+<body>
+
+<div id="shell">
+  <!-- Header -->
+  <div id="header">
+    <div id="header-title">
+      Supabase + Expo &nbsp;·&nbsp; <span>Commit-by-commit walkthrough</span>
+    </div>
+    <div id="commit-dots"></div>
+    <div id="progress-bar"></div>
+  </div>
+
+  <!-- Slide viewport -->
+  <div id="viewport">
+    <div id="slide-track"></div>
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<div id="nav">
+  <button class="nav-btn" id="btn-prev" disabled>
+    <span class="arrow">←</span>
+    <div>
+      <span>Previous</span>
+      <span class="label" id="prev-label"></span>
+    </div>
+  </button>
+
+  <div id="nav-center">
+    <strong id="nav-slide-num">1 / 12</strong>
+    ← → arrow keys &nbsp;·&nbsp; swipe
+    <div class="swipe-hint">Swipe left / right</div>
+  </div>
+
+  <button class="nav-btn" id="btn-next">
+    <div style="text-align:right">
+      <span>Next</span>
+      <span class="label" id="next-label"></span>
+    </div>
+    <span class="arrow">→</span>
+  </button>
+</div>
+
+<script>
+// ─── Slide data ──────────────────────────────────────────────────────────────
+const REPO = 'https://github.com/iamjonjackson/react-native-tutorial/commit/';
+
+const slides = [
+  // ── 1 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: '5f40fd2',
+    shaFull: '5f40fd219ca8ee5d1ad2ce475c29ee66ad61fdad',
+    title: 'Add dependencies for async storage and Supabase',
+    explainer: `<p>Before writing any Supabase code, the two core packages need to be declared in <code>package.json</code>:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>@supabase/supabase-js</strong> — the official Supabase JavaScript client. It handles auth, database queries, storage, and realtime.</li>
+  <li><strong>@react-native-async-storage/async-storage</strong> — a persistent key-value store for React Native. Supabase uses it to cache the user session so the app stays logged in across restarts.</li>
+</ul>
+<p style="margin-top:12px;">After editing <code>package.json</code>, run <code>npm install</code> in your terminal to pull them in.</p>`,
+    notes: [
+      { type: 'note', heading: '🛠 Supabase setup required', body: `In Supabase, go to <strong>SQL Editor → Quickstarts → User Management Starter</strong> and run the SQL to create the <code>profiles</code> table, with Row Level Security (RLS) enabled.` },
+    ],
+    files: [
+      {
+        name: 'package.json',
+        hunks: [
+          { header: '@@ -15,6 +15,8 @@', lines: [
+            { type: 'ctx', n: 15, text: '  "dependencies": {' },
+            { type: 'ctx', n: 16, text: '    "@expo/metro-runtime": "~6.1.2",' },
+            { type: 'ctx', n: 17, text: '    "@expo/ngrok": "^4.1.0",' },
+            { type: 'add', n: 18, text: '+   "@react-native-async-storage/async-storage": "2.2.0",' },
+            { type: 'add', n: 19, text: '+   "@supabase/supabase-js": "^2.108.2",' },
+            { type: 'ctx', n: 20, text: '    "expo": "^54.0.35",' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 2 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: '2185a47',
+    shaFull: '2185a472e5704cfe50e8dbfc5085bfa593428bb9',
+    title: 'Initialise the Supabase client (lib/supabase.ts)',
+    explainer: `<p><code>lib/supabase.ts</code> is the single source of truth for the Supabase client across the entire app. The key config options are:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>storage: AsyncStorage</strong> — sessions are persisted to device storage, so users stay logged in.</li>
+  <li><strong>autoRefreshToken: true</strong> — expired JWTs are silently refreshed without prompting the user to sign in again.</li>
+  <li><strong>persistSession: true</strong> — the session object is written to storage immediately after sign-in.</li>
+  <li><strong>detectSessionInUrl: false</strong> — React Native does not use a browser URL bar, so this must be disabled.</li>
+</ul>
+<p style="margin-top:12px;">Your <code>.env</code> file needs two variables: <code>EXPO_PUBLIC_SUPABASE_URL</code> and <code>EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>. Get these from your Supabase project's <strong>Settings → API Keys</strong> page.</p>`,
+    notes: [
+      { type: 'tip', heading: '🔑 Finding your keys', body: 'In the Supabase dashboard: <strong>Settings → API Keys → Publishable key</strong>. The publishable key is safe to expose client-side because RLS protects the data.' },
+    ],
+    files: [
+      {
+        name: 'lib/supabase.ts',
+        hunks: [
+          { header: 'Full file', lines: [
+            { type: 'add', n: 1,  text: "+import { createClient } from '@supabase/supabase-js'" },
+            { type: 'add', n: 2,  text: "+import AsyncStorage from '@react-native-async-storage/async-storage'" },
+            { type: 'add', n: 3,  text: '+' },
+            { type: 'add', n: 4,  text: '+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!' },
+            { type: 'add', n: 5,  text: '+const supabasePublishableKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY!' },
+            { type: 'add', n: 6,  text: '+' },
+            { type: 'add', n: 7,  text: '+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {' },
+            { type: 'add', n: 8,  text: '+  auth: {' },
+            { type: 'add', n: 9,  text: '+    storage: AsyncStorage as any,' },
+            { type: 'add', n: 10, text: '+    autoRefreshToken: true,' },
+            { type: 'add', n: 11, text: '+    persistSession: true,' },
+            { type: 'add', n: 12, text: '+    detectSessionInUrl: false,' },
+            { type: 'add', n: 13, text: '+  },' },
+            { type: 'add', n: 14, text: '+})' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 3 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: 'abbbc77',
+    shaFull: 'abbbc7780df917ab5152d7b4afa924b65dc5878f',
+    title: 'Add styles for app components (styles/styles.ts)',
+    explainer: `<p>All shared styles live in a single <code>StyleSheet</code> object exported from <code>styles/styles.ts</code>. React Native does not use CSS — instead, <code>StyleSheet.create()</code> validates the style objects at startup and improves runtime performance.</p>
+<p>Key styles defined here:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>container / verticallySpaced / mt20</strong> — layout utilities used by every screen</li>
+  <li><strong>input / inputDisabled</strong> — consistent text field appearance</li>
+  <li><strong>button / buttonText / buttonDisabled</strong> — primary action buttons</li>
+  <li><strong>avatarContainer / avatar / image / noImage</strong> — profile photo display (used later in the Avatar component)</li>
+</ul>`,
+    notes: [
+      { type: 'tip', heading: '📐 Layout in React Native', body: 'React Native uses Flexbox by default — there is no block layout or CSS grid. <code>alignSelf: "stretch"</code> on <code>verticallySpaced</code> makes form fields fill the available width.' },
+    ],
+    files: [
+      {
+        name: 'styles/styles.ts  (new file)',
+        hunks: [
+          { header: 'Excerpt — key styles', lines: [
+            { type: 'add', n: 1,  text: "+import { StyleSheet } from 'react-native'" },
+            { type: 'add', n: 2,  text: '+' },
+            { type: 'add', n: 3,  text: '+export const appStyles = StyleSheet.create({' },
+            { type: 'add', n: 4,  text: '+  container:      { marginTop: 40, padding: 12 },' },
+            { type: 'add', n: 5,  text: "+  verticallySpaced: { paddingTop: 4, paddingBottom: 4, alignSelf: 'stretch' }," },
+            { type: 'add', n: 6,  text: '+  mt20:           { marginTop: 20 },' },
+            { type: 'add', n: 7,  text: "+  button:         { backgroundColor: '#2089dc', borderRadius: 4," },
+            { type: 'add', n: 8,  text: "+                    padding: 12, alignItems: 'center' }," },
+            { type: 'add', n: 9,  text: "+  buttonText:     { color: '#fff', fontSize: 16, fontWeight: '600' }," },
+            { type: 'add', n: 10, text: "+  input:          { borderWidth: 1, borderColor: '#86939e'," },
+            { type: 'add', n: 11, text: '+                    borderRadius: 4, padding: 12, fontSize: 16 },' },
+            { type: 'add', n: 12, text: "+  // ... avatar, label, and other styles also defined" },
+            { type: 'add', n: 13, text: '+})' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 4 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: '0250f8f',
+    shaFull: '0250f8fa7a2ed89d3b7b8449c53dbb4fa8b62869',
+    title: 'Add Auth component — email/password sign-in and sign-up',
+    explainer: `<p><code>components/Auth.tsx</code> renders the login screen. It uses two Supabase auth methods:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>signInWithPassword()</strong> — authenticates an existing user with email + password</li>
+  <li><strong>signUp()</strong> — creates a new account</li>
+</ul>
+<p>Both are async and wrapped in <code>setLoading(true/false)</code> so the buttons are disabled during the network call, preventing duplicate submissions. Errors surface via React Native's <code>Alert.alert()</code>.</p>`,
+    notes: [
+      { type: 'tip', heading: '🔒 Sessions are automatic', body: 'Once <code>signInWithPassword</code> succeeds, the Supabase client automatically stores the JWT in AsyncStorage (configured in the previous commit). The app will stay logged in across restarts.' },
+    ],
+    files: [
+      {
+        name: 'components/Auth.tsx  (new file)',
+        hunks: [
+          { header: 'Key logic', lines: [
+            { type: 'add', n: 1,  text: "+import React, { useState } from 'react'" },
+            { type: 'add', n: 2,  text: "+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'" },
+            { type: 'add', n: 3,  text: "+import { supabase } from '../lib/supabase'" },
+            { type: 'add', n: 4,  text: '+' },
+            { type: 'add', n: 5,  text: '+export default function Auth() {' },
+            { type: 'add', n: 6,  text: '+  const [email, setEmail] = useState(\'\')' },
+            { type: 'add', n: 7,  text: '+  const [password, setPassword] = useState(\'\')' },
+            { type: 'add', n: 8,  text: '+  const [loading, setLoading] = useState(false)' },
+            { type: 'add', n: 9,  text: '+' },
+            { type: 'add', n: 10, text: '+  async function signInWithEmail() {' },
+            { type: 'add', n: 11, text: '+    setLoading(true)' },
+            { type: 'add', n: 12, text: '+    const { error } = await supabase.auth.signInWithPassword(' },
+            { type: 'add', n: 13, text: '+      { email, password }' },
+            { type: 'add', n: 14, text: '+    )' },
+            { type: 'add', n: 15, text: '+    if (error) Alert.alert(error.message)' },
+            { type: 'add', n: 16, text: '+    setLoading(false)' },
+            { type: 'add', n: 17, text: '+  }' },
+            { type: 'add', n: 18, text: '+  // signUpWithEmail is similar — calls supabase.auth.signUp()' },
+            { type: 'add', n: 19, text: '+}' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 5 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: '405ce55',
+    shaFull: '405ce55162289d1ba0575a02a076530388ed92d2',
+    title: 'Add Account component — profile read and update',
+    explainer: `<p><code>components/Account.tsx</code> is the main post-login screen. It reads the user's profile from the <code>profiles</code> table and lets them update it.</p>
+<p>Two Supabase database operations:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>getProfile()</strong> — calls <code>.from('profiles').select(...).eq('id', userId).single()</code>. Status 406 (no rows) is not an error — it just means the user hasn't filled in their profile yet.</li>
+  <li><strong>updateProfile()</strong> — calls <code>.upsert()</code> which inserts or updates the row. RLS policies on the table ensure users can only modify their own row.</li>
+</ul>
+<p>The component receives <code>userId</code> and <code>email</code> as props from the parent, which manages session state.</p>`,
+    notes: [
+      { type: 'note', heading: '📋 Supabase setup', body: 'For database queries to work, enable access to the <code>profiles</code> table via <strong>Integrations → Data API settings → Settings → Exposed Tables</strong>.' },
+    ],
+    files: [
+      {
+        name: 'components/Account.tsx  (new file)',
+        hunks: [
+          { header: 'getProfile and updateProfile', lines: [
+            { type: 'add', n: 1,  text: '+  async function getProfile() {' },
+            { type: 'add', n: 2,  text: '+    setLoading(true)' },
+            { type: 'add', n: 3,  text: "+    let { data, error, status } = await supabase" },
+            { type: 'add', n: 4,  text: "+      .from('profiles')" },
+            { type: 'add', n: 5,  text: "+      .select('username, website, avatar_url')" },
+            { type: 'add', n: 6,  text: '+      .eq(\'id\', userId).single()' },
+            { type: 'add', n: 7,  text: '+    if (error && status !== 406) throw error' },
+            { type: 'add', n: 8,  text: '+    if (data) { setUsername(data.username); ... }' },
+            { type: 'add', n: 9,  text: '+    setLoading(false)' },
+            { type: 'add', n: 10, text: '+  }' },
+            { type: 'add', n: 11, text: '+' },
+            { type: 'add', n: 12, text: '+  async function updateProfile({ username, website, avatar_url }) {' },
+            { type: 'add', n: 13, text: '+    setLoading(true)' },
+            { type: 'add', n: 14, text: "+    const { error } = await supabase.from('profiles').upsert({" },
+            { type: 'add', n: 15, text: '+      id: userId, updated_at: new Date(),' },
+            { type: 'add', n: 16, text: '+      username, website, avatar_url,' },
+            { type: 'add', n: 17, text: '+    })' },
+            { type: 'add', n: 18, text: '+    if (error) Alert.alert(error.message)' },
+            { type: 'add', n: 19, text: '+    setLoading(false)' },
+            { type: 'add', n: 20, text: '+  }' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 6 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: '50fcd97',
+    shaFull: '50fcd97b0462783a46088d28fe3aafddf3cc6276',
+    title: 'Wire Auth and Account into the home screen (app/index.tsx)',
+    explainer: `<p>This commit replaces the placeholder <code>app/index.tsx</code> with the real app shell. It manages session state and switches between the <code>Auth</code> and <code>Account</code> screens based on whether the user is signed in.</p>
+<p>The pattern uses two Supabase calls together:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>getClaims()</strong> on mount — reads the cached session from AsyncStorage to restore state immediately (no network call needed).</li>
+  <li><strong>onAuthStateChange()</strong> — a realtime subscription that fires whenever the user signs in, signs out, or the token refreshes. The subscription is cleaned up in the <code>useEffect</code> return.</li>
+</ul>
+<p><em>Note:</em> This tutorial uses <code>app/index.tsx</code> (Expo Router's file-based routing) rather than the official Supabase tutorial's <code>App.tsx</code>.</p>`,
+    notes: [
+      { type: 'tip', heading: '🔄 The subscription pattern', body: 'Always return <code>subscription.unsubscribe()</code> from the useEffect cleanup. Without it, multiple listeners accumulate each time the component re-mounts.' },
+    ],
+    files: [
+      {
+        name: 'app/index.tsx',
+        hunks: [
+          { header: 'Replacing the placeholder', lines: [
+            { type: 'rem', n: 1,  text: "-import { Text, View, StyleSheet } from 'react-native';" },
+            { type: 'rem', n: 2,  text: '-export default function HomeScreen() {' },
+            { type: 'rem', n: 3,  text: '-  return <View><Text>✅ Expo is running</Text></View>' },
+            { type: 'rem', n: 4,  text: '-}' },
+            { type: 'add', n: 1,  text: "+import { View } from 'react-native';" },
+            { type: 'add', n: 2,  text: "+import { useState, useEffect } from 'react'" },
+            { type: 'add', n: 3,  text: "+import { supabase } from '../lib/supabase'" },
+            { type: 'add', n: 4,  text: "+import Auth from '../components/Auth'" },
+            { type: 'add', n: 5,  text: "+import Account from '../components/Account'" },
+            { type: 'add', n: 6,  text: '+' },
+            { type: 'add', n: 7,  text: '+export default function HomeScreen() {' },
+            { type: 'add', n: 8,  text: '+  const [userId, setUserId] = useState<string | null>(null)' },
+            { type: 'add', n: 9,  text: '+  const [email, setEmail] = useState<string | undefined>(undefined)' },
+            { type: 'add', n: 10, text: '+  useEffect(() => {' },
+            { type: 'add', n: 11, text: '+    supabase.auth.getClaims().then(({ data }) => {' },
+            { type: 'add', n: 12, text: '+      const claims = data?.claims' },
+            { type: 'add', n: 13, text: '+      if (!claims) return' },
+            { type: 'add', n: 14, text: '+      setUserId(claims.sub); setEmail(claims.email)' },
+            { type: 'add', n: 15, text: '+    })' },
+            { type: 'add', n: 16, text: '+    const { data: { subscription } } =' },
+            { type: 'add', n: 17, text: '+      supabase.auth.onAuthStateChange(async () => { /* sync claims */ })' },
+            { type: 'add', n: 18, text: '+    return () => subscription.unsubscribe()' },
+            { type: 'add', n: 19, text: '+  }, [])' },
+            { type: 'add', n: 20, text: '+  return <View>{userId' },
+            { type: 'add', n: 21, text: '+    ? <Account key={userId} userId={userId} email={email} />' },
+            { type: 'add', n: 22, text: '+    : <Auth />}</View>' },
+            { type: 'add', n: 23, text: '+}' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 7 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: 'de1d7e2',
+    shaFull: 'de1d7e23405e9fad5f9d3910fe77a277119f59b5',
+    title: 'Add registration success message with styling',
+    explainer: `<p>By default, new registrations require email confirmation before the user can sign in. This commit adds a clear in-app message after <code>signUp()</code> succeeds, so users know to check their inbox rather than assuming the app is broken.</p>
+<p>A new piece of state — <code>registrationMessage</code> — is set in the success branch of the <code>signUp</code> response, and cleared whenever a sign-in or sign-up attempt starts. It renders below the buttons in a green-tinted <code>successMessage</code> style.</p>`,
+    notes: [
+      { type: 'warn', heading: '⚠️ Supabase dashboard changes needed for testing', body: `<ul>
+  <li>Go to <strong>Authentication → Sign In / Providers → Email</strong> and switch off <em>Confirm email</em> so new registrations are approved immediately without needing to click a link.</li>
+  <li>Enable access to the <code>profiles</code> table via <strong>Integrations → Data API settings → Settings → Exposed Tables</strong>.</li>
+  <li>To test: log in, update profile details, log out, log back in, and verify changes are persistent. Check the Supabase table editor to confirm the updates appear there too.</li>
+</ul>` },
+    ],
+    files: [
+      {
+        name: 'components/Auth.tsx',
+        hunks: [
+          { header: 'State + success handling', lines: [
+            { type: 'add', n: 7,  text: '+  const [registrationMessage, setRegistrationMessage] = useState<string | null>(null)' },
+            { type: 'hunk', n: null, text: '@@ signUpWithEmail @@' },
+            { type: 'rem', n: 26, text: "-    const { error } = await supabase.auth.signUp({ email, password })" },
+            { type: 'rem', n: 27, text: "-    if (error) Alert.alert(error.message)" },
+            { type: 'add', n: 26, text: "+    const { data, error } = await supabase.auth.signUp({ email, password })" },
+            { type: 'add', n: 27, text: "+    if (error) { Alert.alert(error.message) }" },
+            { type: 'add', n: 28, text: "+    else if (data?.user) {" },
+            { type: 'add', n: 29, text: "+      setRegistrationMessage('Registration successful." },
+            { type: 'add', n: 30, text: "+        Check your email to confirm your account.')" },
+            { type: 'add', n: 31, text: "+    }" },
+          ]}
+        ]
+      },
+      {
+        name: 'styles/styles.ts',
+        hunks: [
+          { header: 'New style', lines: [
+            { type: 'add', n: 46, text: "+  successMessage: {" },
+            { type: 'add', n: 47, text: "+    color: '#1f7a3d'," },
+            { type: 'add', n: 48, text: "+    fontSize: 14," },
+            { type: 'add', n: 49, text: "+    lineHeight: 20," },
+            { type: 'add', n: 50, text: "+  }," },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 8 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: 'c3e82eb',
+    shaFull: 'c3e82ebac23f02fc0fac366584c8857f235c03ea',
+    title: 'Refactor HomeScreen — use getSession() instead of getClaims()',
+    explainer: `<p>The previous implementation used <code>getClaims()</code> to restore session on mount, but this approach had a gap: if <code>getClaims()</code> succeeded but <code>onAuthStateChange</code> fired with a null session (e.g. after token expiry), error handling was inconsistent.</p>
+<p>This refactor switches to <code>getSession()</code> which returns the full session object (including <code>user.id</code> and <code>user.email</code>) and unifies the logic into two helper functions:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>syncUserFromSession(session)</strong> — sets or clears userId/email from a session object</li>
+  <li><strong>clearUser()</strong> — resets both to null/undefined</li>
+</ul>
+<p>Both <code>getSession()</code> on mount and <code>onAuthStateChange</code> now route through the same helpers, making the logic easier to follow and extend.</p>`,
+    notes: [
+      { type: 'tip', heading: '📌 Why getSession over getClaims?', body: '<code>getSession()</code> returns a <code>Session</code> typed object with <code>session.user.id</code>. <code>getClaims()</code> returns raw JWT payload — fine, but less structured and more brittle for this use case.' },
+    ],
+    files: [
+      {
+        name: 'app/index.tsx',
+        hunks: [
+          { header: 'New session helpers', lines: [
+            { type: 'add', n: 10, text: '+  const clearUser = () => { setUserId(null); setEmail(undefined) }' },
+            { type: 'add', n: 11, text: '+' },
+            { type: 'add', n: 12, text: '+  const syncUserFromSession = (session) => {' },
+            { type: 'add', n: 13, text: '+    const user = session?.user' },
+            { type: 'add', n: 14, text: '+    if (!user?.id) { clearUser(); return }' },
+            { type: 'add', n: 15, text: '+    setUserId(user.id)' },
+            { type: 'add', n: 16, text: '+    setEmail(user.email ?? undefined)' },
+            { type: 'add', n: 17, text: '+  }' },
+            { type: 'hunk', n: null, text: '@@ useEffect @@' },
+            { type: 'rem', n: 18, text: '-    supabase.auth.getClaims().then(({ data }) => {' },
+            { type: 'rem', n: 19, text: '-      const claims = data?.claims; if (!claims) return' },
+            { type: 'rem', n: 20, text: '-      setUserId(claims.sub); setEmail(claims.email)' },
+            { type: 'rem', n: 21, text: '-    })' },
+            { type: 'add', n: 18, text: '+    supabase.auth.getSession()' },
+            { type: 'add', n: 19, text: '+      .then(({ data }) => syncUserFromSession(data.session))' },
+            { type: 'add', n: 20, text: '+      .catch(() => clearUser())' },
+            { type: 'add', n: 21, text: '+    const { data: { subscription } } =' },
+            { type: 'add', n: 22, text: '+      supabase.auth.onAuthStateChange((_event, session) => {' },
+            { type: 'add', n: 23, text: '+        syncUserFromSession(session)' },
+            { type: 'add', n: 24, text: '+      })' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 9 ──────────────────────────────────────────────────────────────────────
+  {
+    sha: '398e0c7',
+    shaFull: '398e0c72d6af9f62b8481f6643f100623e3018d3',
+    title: 'Add expo-image-picker dependency',
+    explainer: `<p><code>expo-image-picker</code> provides access to the device's photo library and camera. It abstracts the platform-specific permission prompts and image picking APIs on both iOS and Android.</p>
+<p>This is needed for the Avatar upload feature added in the next commit — users will pick a photo from their library and it will be uploaded to Supabase Storage.</p>
+<p>After editing <code>package.json</code>, run <code>npm install</code> to pull in the package.</p>`,
+    notes: [
+      { type: 'warn', heading: '⚠️ Version pinned in next commit', body: 'The initial version here (<code>^56.0.18</code>) is incorrect for Expo SDK 54 — it gets corrected in the very next commit. The right version for SDK 54 is <code>~17.0.11</code>.' },
+    ],
+    files: [
+      {
+        name: 'package.json',
+        hunks: [
+          { header: '@@ -19,6 +19,7 @@', lines: [
+            { type: 'ctx', n: 19, text: '    "@supabase/supabase-js": "^2.108.2",' },
+            { type: 'ctx', n: 20, text: '    "expo": "^54.0.35",' },
+            { type: 'ctx', n: 21, text: '    "expo-constants": "~18.0.13",' },
+            { type: 'add', n: 22, text: '+   "expo-image-picker": "^56.0.18",' },
+            { type: 'ctx', n: 23, text: '    "expo-linking": "~8.0.12",' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 10 ─────────────────────────────────────────────────────────────────────
+  {
+    sha: '0d89a6f',
+    shaFull: '0d89a6f6065fe468f20355893d61bc9cb2613785',
+    title: 'Add Avatar component — image picker and Supabase Storage upload',
+    explainer: `<p><code>components/Avatar.tsx</code> handles the full avatar lifecycle:</p>
+<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li><strong>downloadImage(path)</strong> — fetches the image from the <code>avatars</code> Supabase Storage bucket using <code>supabase.storage.from('avatars').download(path)</code>, then converts the blob to a base64 data URL for display in an <code>&lt;Image&gt;</code> component.</li>
+  <li><strong>uploadAvatar()</strong> — opens the device photo library with <code>ImagePicker.launchImageLibraryAsync()</code>, reads the selected image as a blob, and uploads it to Supabase Storage with <code>.upload()</code>. On success it calls the <code>onUpload</code> callback prop so the parent (Account) can save the new path to the profile row.</li>
+</ul>
+<p>The component accepts <code>url</code>, <code>size</code>, and <code>onUpload</code> as props.</p>`,
+    notes: [
+      { type: 'tip', heading: '🪣 Storage bucket', body: 'The <code>avatars</code> bucket needs to exist in your Supabase project. Create it via <strong>Storage → New bucket</strong>. Make it public if you want avatars to be visible to other users; private if you want per-user signed URLs.' },
+    ],
+    files: [
+      {
+        name: 'components/Avatar.tsx  (new file)',
+        hunks: [
+          { header: 'Core upload logic', lines: [
+            { type: 'add', n: 1,  text: "+import * as ImagePicker from 'expo-image-picker'" },
+            { type: 'add', n: 2,  text: "+import { supabase } from '../lib/supabase'" },
+            { type: 'add', n: 3,  text: '+' },
+            { type: 'add', n: 4,  text: '+async function uploadAvatar() {' },
+            { type: 'add', n: 5,  text: '+  const result = await ImagePicker.launchImageLibraryAsync({' },
+            { type: 'add', n: 6,  text: '+    mediaTypes: ImagePicker.MediaTypeOptions.Images,' },
+            { type: 'add', n: 7,  text: '+    allowsMultipleSelection: false,' },
+            { type: 'add', n: 8,  text: '+    allowsEditing: true,' },
+            { type: 'add', n: 9,  text: '+    quality: 1,' },
+            { type: 'add', n: 10, text: '+  })' },
+            { type: 'add', n: 11, text: '+  if (result.canceled) return' },
+            { type: 'add', n: 12, text: '+  const file = result.assets[0]' },
+            { type: 'add', n: 13, text: '+  const arraybuffer = await fetch(file.uri).then(r => r.arrayBuffer())' },
+            { type: 'add', n: 14, text: '+  const { data, error } = await supabase.storage' },
+            { type: 'add', n: 15, text: "+    .from('avatars').upload(filePath, arraybuffer, {" },
+            { type: 'add', n: 16, text: "+      contentType: file.mimeType ?? 'image/jpeg'" },
+            { type: 'add', n: 17, text: '+    })' },
+            { type: 'add', n: 18, text: '+  if (error) throw error' },
+            { type: 'add', n: 19, text: '+  onUpload(data.path)' },
+            { type: 'add', n: 20, text: '+}' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 11 ─────────────────────────────────────────────────────────────────────
+  {
+    sha: 'dd62bb4',
+    shaFull: 'dd62bb44fd35f8d31bc25ebba89368ccf70ba8d2',
+    title: 'Fix expo-image-picker version for Expo SDK 54',
+    explainer: `<p>The previous commit added <code>expo-image-picker</code> at version <code>^56.0.18</code>, which is incompatible with Expo SDK 54. This commit pins it to <code>~17.0.11</code> — the version that matches SDK 54's compatibility table.</p>
+<p>This is a common stumbling block: Expo package versions do not follow npm's major version semantics. Each Expo SDK release has a specific compatible version for each Expo package, listed at <a href="https://libraries.io/npm/expo-image-picker/17.0.11" style="color:#6ea8fe">libraries.io</a> and in the Expo docs.</p>
+<p>After this change, run <code>npm install</code> again to downgrade to the correct version.</p>`,
+    notes: [
+      { type: 'tip', heading: '💡 Avoid version mismatches', body: 'Use <code>npx expo install expo-image-picker</code> instead of <code>npm install</code> — the Expo CLI automatically selects the version that matches your SDK.' },
+    ],
+    files: [
+      {
+        name: 'package.json',
+        hunks: [
+          { header: 'Version corrected', lines: [
+            { type: 'rem', n: 22, text: '-   "expo-image-picker": "^56.0.18",' },
+            { type: 'add', n: 22, text: '+   "expo-image-picker": "~17.0.11",' },
+          ]}
+        ]
+      }
+    ]
+  },
+
+  // ── 12 ─────────────────────────────────────────────────────────────────────
+  {
+    sha: 'f785c20',
+    shaFull: 'f785c2085fcdb91715176b00584390ef28ba2cce',
+    title: 'Connect Avatar component into the Account screen',
+    explainer: `<p>The final commit wires everything together. The <code>Avatar</code> component is now imported and rendered at the top of the Account screen. The <code>onUpload</code> callback is what connects avatar upload back to the profile — when the Avatar component finishes uploading the image to Storage, it calls <code>onUpload(url)</code> which:</p>
+<ol style="padding-left:18px;margin-top:8px;line-height:1.8;">
+  <li>Updates local state (<code>setAvatarUrl(url)</code>) so the UI reflects the new image immediately</li>
+  <li>Calls <code>updateProfile({ username, website, avatar_url: url })</code> to persist the new path to the database</li>
+</ol>
+<p>The previously commented-out <code>Avatar</code> import is now active. The <code>/* ... */</code> placeholder in the JSX is replaced with the real <code>&lt;Avatar&gt;</code> element.</p>`,
+    notes: [
+      { type: 'check', heading: '✅ Full app complete — test this flow', body: `<ul>
+  <li>Register a new account</li>
+  <li>Fill in username and website, tap Save</li>
+  <li>Tap the avatar area and pick a photo from your library</li>
+  <li>Sign out, then sign back in — verify all profile details persist</li>
+  <li>Check the <strong>profiles</strong> table in the Supabase dashboard to confirm the row updated</li>
+</ul>` },
+    ],
+    files: [
+      {
+        name: 'components/Account.tsx',
+        hunks: [
+          { header: 'Avatar import + usage', lines: [
+            { type: 'rem', n: 3,  text: "-// import Avatar from './Avatar'" },
+            { type: 'add', n: 3,  text: "+import Avatar from './Avatar'" },
+            { type: 'hunk', n: null, text: '@@ render @@' },
+            { type: 'rem', n: 79, text: "-      {/* ... */}" },
+            { type: 'add', n: 79, text: "+      <Avatar" },
+            { type: 'add', n: 80, text: "+        size={200}" },
+            { type: 'add', n: 81, text: "+        url={avatarUrl}" },
+            { type: 'add', n: 82, text: "+        onUpload={(url: string) => {" },
+            { type: 'add', n: 83, text: "+          setAvatarUrl(url)" },
+            { type: 'add', n: 84, text: "+          updateProfile({ username, website, avatar_url: url })" },
+            { type: 'add', n: 85, text: "+        }}" },
+            { type: 'add', n: 86, text: "+      />" },
+          ]}
+        ]
+      }
+    ]
+  },
+];
+
+// ─── Render ──────────────────────────────────────────────────────────────────
+let current = 0;
+const visited = new Set([0]);
+
+function renderDiff(file) {
+  let html = `<div class="diff-wrap">
+    <div class="diff-file-header">${escHtml(file.name)}</div>
+    <div class="diff-body">`;
+
+  for (const hunk of file.hunks) {
+    html += `<div class="diff-line hunk"><div class="diff-gutter">…</div><div class="diff-content">${escHtml(hunk.header)}</div></div>`;
+    for (const line of hunk.lines) {
+      const cls = line.type === 'add' ? 'add' : line.type === 'rem' ? 'rem' : line.type === 'hunk' ? 'hunk' : '';
+      const gutter = line.n !== null ? line.n : '';
+      html += `<div class="diff-line ${cls}"><div class="diff-gutter">${gutter}</div><div class="diff-content">${escHtml(line.text)}</div></div>`;
+    }
+  }
+
+  html += `</div></div>`;
+  return html;
+}
+
+function renderCallout(note) {
+  return `<div class="callout callout-${note.type}"><strong>${note.heading}</strong>${note.body}</div>`;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildSlides() {
+  const track = document.getElementById('slide-track');
+  const dotsContainer = document.getElementById('commit-dots');
+
+  slides.forEach((s, i) => {
+    // Dot
+    const dot = document.createElement('button');
+    dot.className = 'commit-dot' + (i === 0 ? ' active' : '');
+    dot.title = `${i+1}. ${s.title}`;
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+
+    // Slide
+    const slide = document.createElement('div');
+    slide.className = 'slide';
+
+    let calloutsHtml = (s.notes || []).map(renderCallout).join('');
+    let diffsHtml = (s.files || []).map(renderDiff).join('<div style="height:16px"></div>');
+
+    slide.innerHTML = `
+      <div class="slide-meta">
+        <span class="slide-num">Commit ${i+1} of ${slides.length}</span>
+        <a class="slide-sha" href="${REPO}${s.shaFull}" target="_blank" rel="noopener">${s.sha}</a>
+      </div>
+      <h2 class="slide-title">${escHtml(s.title)}</h2>
+      <div class="divider"></div>
+      <div class="slide-body">
+        <div class="slide-left">
+          <div class="explainer">${s.explainer}</div>
+          ${calloutsHtml}
+        </div>
+        <div class="slide-right">
+          ${diffsHtml}
+        </div>
+      </div>`;
+
+    track.appendChild(slide);
+  });
+}
+
+function updateUI() {
+  const total = slides.length;
+  const pct = ((current + 1) / total * 100).toFixed(1);
+
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('nav-slide-num').textContent = `${current + 1} / ${total}`;
+
+  // Dots
+  document.querySelectorAll('.commit-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === current);
+    dot.classList.toggle('visited', visited.has(i) && i !== current);
+  });
+
+  // Buttons
+  const prev = document.getElementById('btn-prev');
+  const next = document.getElementById('btn-next');
+  prev.disabled = current === 0;
+  next.disabled = current === total - 1;
+
+  const prevLabel = document.getElementById('prev-label');
+  const nextLabel = document.getElementById('next-label');
+  if (current > 0) prevLabel.textContent = `#${current}`;
+  else prevLabel.textContent = '';
+  if (current < total - 1) nextLabel.textContent = `#${current + 2}`;
+  else nextLabel.textContent = '';
+
+  // Track position
+  document.getElementById('slide-track').style.transform = `translateX(-${current * 100}%)`;
+
+  // Scroll slide to top
+  const slides_el = document.querySelectorAll('.slide');
+  if (slides_el[current]) slides_el[current].scrollTop = 0;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  current = idx;
+  visited.add(current);
+  updateUI();
+}
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goTo(current + 1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   { e.preventDefault(); goTo(current - 1); }
+});
+
+// Buttons
+document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+
+// Touch / swipe
+let touchStartX = 0;
+let touchStartY = 0;
+const viewport = document.getElementById('viewport');
+
+viewport.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+viewport.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    if (dx < 0) goTo(current + 1);
+    else goTo(current - 1);
+  }
+}, { passive: true });
+
+// Init
+buildSlides();
+updateUI();
+</script>
+</body>
+</html>
