@@ -1577,7 +1577,8 @@
           <li>Go to the <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">workshop repo</a> and click "use this template > create a new repository"</li>
           <li>In your newly copied repo, click <strong>Code → Codespaces → New codespace</strong></li>
           <li>Wait ~3 min for it to provision</li>
-          <li>In the terminal: <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo start</code></li>
+          <li>If node packages haven't been installed yet, run <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npm install</code> in the terminal</li>
+          <li>Next, in the terminal: <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo start --tunnel</code> or <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npm start</code></li>
           <li>Scan the QR with Expo Go or open the web preview</li>
         </ul>
         <div class="path-note">⚠️ Common issues: may take some time to provision. Fall back to Snack if you are still blocked after several retries.</div>
@@ -1590,7 +1591,7 @@
         <ul>
           <li>Clone the <a href="https://github.com/iamjonjackson/react-native-tutorial" target="_blank">workshop repo</a></li>
           <li>Run <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npm install</code></li>
-          <li>Run <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo start</code></li>
+          <li>Run <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npx expo start --tunnel</code> or <code style="font-family:var(--font-mono);font-size:12px;background:var(--code-bg);padding:1px 5px;border-radius:3px">npm start</code></li>
           <li>Fastest if you're already set up</li>
         </ul>
         <div class="path-note">If you're on Path C and happy, help your neighbours on Path B.</div>
@@ -1616,7 +1617,6 @@
           <strong style="display: block; margin-bottom: 8px; color: var(--green);">✓ Why we use it</strong>
           <ul style="font-size: 13px; margin: 0; padding-left: 20px; color: var(--muted);">
             <li>Works on any network</li>
-            <li>No WiFi issues</li>
             <li>Works with Codespaces</li>
           </ul>
         </div>
@@ -1926,7 +1926,7 @@ app/
 
     <div class="facilitator-note">
       <div class="fn-label">Demos</div>
-      <p>Share 1-minute video links in the chat. For the vote: "Drop a 🔥 against your favourite demo."</p>
+      <p>Share 1-minute video or video links in the chat. For the vote: "Drop a 🔥 against your favourite demo."</p>
     </div>
   </section>
 

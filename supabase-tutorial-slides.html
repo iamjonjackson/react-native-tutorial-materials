@@ -39,6 +39,14 @@
     overflow: hidden;
   }
 
+  code {
+    font-family: var(--mono);
+    font-size: 14px;
+    background: rgba(255,255,255,0.05);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
   /* ─── Shell ─── */
   #shell {
     display: flex;
@@ -149,8 +157,8 @@
 
   .slide-sha {
     font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent-dim);
+    font-size: 12px;
+    color: var(--accent);
     background: rgba(62,207,142,0.08);
     padding: 2px 8px;
     border-radius: 99px;
@@ -217,7 +225,7 @@
   .callout-warn { border-color: var(--rem);  background: var(--rem-bg);  color: #f08070; }
   .callout-check { border-color: var(--accent); background: var(--add-bg); color: #7ee8b8; }
 
-  .callout strong { font-weight: 700; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+  .callout strong { font-weight: 700; margin: 5px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
 
   .callout ul, .callout ol {
     padding-left: 18px;
@@ -436,12 +444,11 @@ const slides = [
     sha: '5f40fd2',
     shaFull: '5f40fd219ca8ee5d1ad2ce475c29ee66ad61fdad',
     title: 'Add dependencies for async storage and Supabase',
-    explainer: `<p>Before writing any Supabase code, the two core packages need to be declared in <code>package.json</code>:</p>
-<ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
+    explainer: `<p>Before writing any Supabase code, the two core packages need to be installed. Use the following command:<br /><br /><code>npx expo install @supabase/supabase-js @react-native-async-storage/async-storage</code></p>
+<ul style="padding-left:18px;margin-top:20px;line-height:1.8;">
   <li><strong>@supabase/supabase-js</strong> — the official Supabase JavaScript client. It handles auth, database queries, storage, and realtime.</li>
   <li><strong>@react-native-async-storage/async-storage</strong> — a persistent key-value store for React Native. Supabase uses it to cache the user session so the app stays logged in across restarts.</li>
-</ul>
-<p style="margin-top:12px;">After editing <code>package.json</code>, run <code>npm install</code> in your terminal to pull them in.</p>`,
+</ul>`,
     notes: [
       { type: 'note', heading: '🛠 Supabase setup required', body: `In Supabase, go to <strong>SQL Editor → Quickstarts → User Management Starter</strong> and run the SQL to create the <code>profiles</code> table, with Row Level Security (RLS) enabled.` },
     ],
@@ -466,8 +473,8 @@ const slides = [
   {
     sha: '2185a47',
     shaFull: '2185a472e5704cfe50e8dbfc5085bfa593428bb9',
-    title: 'Initialise the Supabase client (lib/supabase.ts)',
-    explainer: `<p><code>lib/supabase.ts</code> is the single source of truth for the Supabase client across the entire app. The key config options are:</p>
+    title: 'Update the Supabase client (lib/supabase.ts)',
+    explainer: `<p>KEY ACTION: Update <code>lib/supabase.ts</code> with the code provided.</p><p><code>lib/supabase.ts</code> is where we setup the Supabase client for the entire app. The key config options are:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>storage: AsyncStorage</strong> — sessions are persisted to device storage, so users stay logged in.</li>
   <li><strong>autoRefreshToken: true</strong> — expired JWTs are silently refreshed without prompting the user to sign in again.</li>
@@ -508,7 +515,7 @@ const slides = [
     sha: 'abbbc77',
     shaFull: 'abbbc7780df917ab5152d7b4afa924b65dc5878f',
     title: 'Add styles for app components (styles/styles.ts)',
-    explainer: `<p>All shared styles live in a single <code>StyleSheet</code> object exported from <code>styles/styles.ts</code>. React Native does not use CSS — instead, <code>StyleSheet.create()</code> validates the style objects at startup and improves runtime performance.</p>
+    explainer: `<p>KEY ACTION: Create the style sheet for the app using the code provided.</p><p>All shared styles live in a single <code>StyleSheet</code> object exported from <code>styles/styles.ts</code>. React Native does not use CSS — instead, <code>StyleSheet.create()</code> validates the style objects at startup and improves runtime performance.</p>
 <p>Key styles defined here:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>container / verticallySpaced / mt20</strong> — layout utilities used by every screen</li>
@@ -548,7 +555,7 @@ const slides = [
     sha: '0250f8f',
     shaFull: '0250f8fa7a2ed89d3b7b8449c53dbb4fa8b62869',
     title: 'Add Auth component — email/password sign-in and sign-up',
-    explainer: `<p><code>components/Auth.tsx</code> renders the login screen. It uses two Supabase auth methods:</p>
+    explainer: `<p>KEY ACTION: Create the <code>components/Auth.tsx</code> file with the code provided.</p><p><code>components/Auth.tsx</code> renders the login screen. It uses two Supabase auth methods:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>signInWithPassword()</strong> — authenticates an existing user with email + password</li>
   <li><strong>signUp()</strong> — creates a new account</li>
@@ -592,7 +599,7 @@ const slides = [
     sha: '405ce55',
     shaFull: '405ce55162289d1ba0575a02a076530388ed92d2',
     title: 'Add Account component — profile read and update',
-    explainer: `<p><code>components/Account.tsx</code> is the main post-login screen. It reads the user's profile from the <code>profiles</code> table and lets them update it.</p>
+    explainer: `<p>KEY ACTION: Create the <code>components/Account.tsx</code> file with the code provided.</p><p><code>components/Account.tsx</code> is the main post-login screen. It reads the user's profile from the <code>profiles</code> table and lets them update it.</p>
 <p>Two Supabase database operations:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>getProfile()</strong> — calls <code>.from('profiles').select(...).eq('id', userId).single()</code>. Status 406 (no rows) is not an error — it just means the user hasn't filled in their profile yet.</li>
@@ -638,7 +645,7 @@ const slides = [
     sha: '50fcd97',
     shaFull: '50fcd97b0462783a46088d28fe3aafddf3cc6276',
     title: 'Wire Auth and Account into the home screen (app/index.tsx)',
-    explainer: `<p>This commit replaces the placeholder <code>app/index.tsx</code> with the real app shell. It manages session state and switches between the <code>Auth</code> and <code>Account</code> screens based on whether the user is signed in.</p>
+    explainer: `<p>KEY ACTION: Update <code>app/index.tsx</code> with the code provided.</p><p>This commit replaces the placeholder <code>app/index.tsx</code> with the real app shell. It manages session state and switches between the <code>Auth</code> and <code>Account</code> screens based on whether the user is signed in.</p>
 <p>The pattern uses two Supabase calls together:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>getClaims()</strong> on mount — reads the cached session from AsyncStorage to restore state immediately (no network call needed).</li>
@@ -691,7 +698,7 @@ const slides = [
     sha: 'de1d7e2',
     shaFull: 'de1d7e23405e9fad5f9d3910fe77a277119f59b5',
     title: 'Add registration success message with styling',
-    explainer: `<p>By default, new registrations require email confirmation before the user can sign in. This commit adds a clear in-app message after <code>signUp()</code> succeeds, so users know to check their inbox rather than assuming the app is broken.</p>
+    explainer: `<p>KEY ACTIONS: Add a registration success message with styling, and configure supabase dashboard settings.</p><p>By default, new registrations require email confirmation before the user can sign in. This commit adds a clear in-app message after <code>signUp()</code> succeeds, so users know to check their inbox rather than assuming the app is broken.</p>
 <p>A new piece of state — <code>registrationMessage</code> — is set in the success branch of the <code>signUp</code> response, and cleared whenever a sign-in or sign-up attempt starts. It renders below the buttons in a green-tinted <code>successMessage</code> style.</p>`,
     notes: [
       { type: 'warn', heading: '⚠️ Supabase dashboard changes needed for testing', body: `<ul>
@@ -738,7 +745,7 @@ const slides = [
     sha: 'c3e82eb',
     shaFull: 'c3e82ebac23f02fc0fac366584c8857f235c03ea',
     title: 'Refactor HomeScreen — use getSession() instead of getClaims()',
-    explainer: `<p>The previous implementation used <code>getClaims()</code> to restore session on mount, but this approach had a gap: if <code>getClaims()</code> succeeded but <code>onAuthStateChange</code> fired with a null session (e.g. after token expiry), error handling was inconsistent.</p>
+    explainer: `<p>KEY ACTION: Refactor session management logic using code provided.</p><p>The previous implementation used <code>getClaims()</code> to restore session on mount, but this approach had a gap: if <code>getClaims()</code> succeeded but <code>onAuthStateChange</code> fired with a null session (e.g. after token expiry), error handling was inconsistent.</p>
 <p>This refactor switches to <code>getSession()</code> which returns the full session object (including <code>user.id</code> and <code>user.email</code>) and unifies the logic into two helper functions:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>syncUserFromSession(session)</strong> — sets or clears userId/email from a session object</li>
@@ -784,11 +791,11 @@ const slides = [
     sha: '398e0c7',
     shaFull: '398e0c72d6af9f62b8481f6643f100623e3018d3',
     title: 'Add expo-image-picker dependency',
-    explainer: `<p><code>expo-image-picker</code> provides access to the device's photo library and camera. It abstracts the platform-specific permission prompts and image picking APIs on both iOS and Android.</p>
+    explainer: `<p>KEY ACTION: Add expo-image-picker dependency.</p><p><code>expo-image-picker</code> provides access to the device's photo library and camera. It abstracts the platform-specific permission prompts and image picking APIs on both iOS and Android.</p>
 <p>This is needed for the Avatar upload feature added in the next commit — users will pick a photo from their library and it will be uploaded to Supabase Storage.</p>
-<p>After editing <code>package.json</code>, run <code>npm install</code> to pull in the package.</p>`,
+<p>You can add packages using <code>npm install</code> or manually editing <code>package.json</code>. Try editing <code>package.json</code> manually as per the code snippet shown and then run <code>npm install</code> to pull in the package.</p>`,
     notes: [
-      { type: 'warn', heading: '⚠️ Version pinned in next commit', body: 'The initial version here (<code>^56.0.18</code>) is incorrect for Expo SDK 54 — it gets corrected in the very next commit. The right version for SDK 54 is <code>~17.0.11</code>.' },
+      { type: 'warn', heading: '⚠️ Version pinned in a later commit', body: 'The initial version here (<code>^56.0.18</code>) is incorrect for Expo SDK 54 — it gets corrected in a later commit. The right version for SDK 54 is <code>~17.0.11</code>.' },
     ],
     files: [
       {
@@ -811,14 +818,14 @@ const slides = [
     sha: '0d89a6f',
     shaFull: '0d89a6f6065fe468f20355893d61bc9cb2613785',
     title: 'Add Avatar component — image picker and Supabase Storage upload',
-    explainer: `<p><code>components/Avatar.tsx</code> handles the full avatar lifecycle:</p>
+    explainer: `<p>KEY ACTION: Create the Avatar component using the code provided.</p><p><code>components/Avatar.tsx</code> handles the full avatar lifecycle:</p>
 <ul style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li><strong>downloadImage(path)</strong> — fetches the image from the <code>avatars</code> Supabase Storage bucket using <code>supabase.storage.from('avatars').download(path)</code>, then converts the blob to a base64 data URL for display in an <code>&lt;Image&gt;</code> component.</li>
   <li><strong>uploadAvatar()</strong> — opens the device photo library with <code>ImagePicker.launchImageLibraryAsync()</code>, reads the selected image as a blob, and uploads it to Supabase Storage with <code>.upload()</code>. On success it calls the <code>onUpload</code> callback prop so the parent (Account) can save the new path to the profile row.</li>
 </ul>
 <p>The component accepts <code>url</code>, <code>size</code>, and <code>onUpload</code> as props.</p>`,
     notes: [
-      { type: 'tip', heading: '🪣 Storage bucket', body: 'The <code>avatars</code> bucket needs to exist in your Supabase project. Create it via <strong>Storage → New bucket</strong>. Make it public if you want avatars to be visible to other users; private if you want per-user signed URLs.' },
+      // { type: 'tip', heading: '🪣 Storage bucket', body: 'The <code>avatars</code> bucket needs to exist in your Supabase project. Create it via <strong>Storage → New bucket</strong>. Make it public if you want avatars to be visible to other users; private if you want per-user signed URLs.' },
     ],
     files: [
       {
@@ -856,7 +863,7 @@ const slides = [
     sha: 'dd62bb4',
     shaFull: 'dd62bb44fd35f8d31bc25ebba89368ccf70ba8d2',
     title: 'Fix expo-image-picker version for Expo SDK 54',
-    explainer: `<p>The previous commit added <code>expo-image-picker</code> at version <code>^56.0.18</code>, which is incompatible with Expo SDK 54. This commit pins it to <code>~17.0.11</code> — the version that matches SDK 54's compatibility table.</p>
+    explainer: `<p>KEY ACTION: Fix the expo-image-picker version in package.json for compatibility with Expo SDK 54</p><p>A previous commit added <code>expo-image-picker</code> at version <code>^56.0.18</code>, which is incompatible with Expo SDK 54. This commit pins it to <code>~17.0.11</code> — the version that matches SDK 54's compatibility table.</p>
 <p>This is a common stumbling block: Expo package versions do not follow npm's major version semantics. Each Expo SDK release has a specific compatible version for each Expo package, listed at <a href="https://libraries.io/npm/expo-image-picker/17.0.11" style="color:#6ea8fe">libraries.io</a> and in the Expo docs.</p>
 <p>After this change, run <code>npm install</code> again to downgrade to the correct version.</p>`,
     notes: [
@@ -880,7 +887,7 @@ const slides = [
     sha: 'f785c20',
     shaFull: 'f785c2085fcdb91715176b00584390ef28ba2cce',
     title: 'Connect Avatar component into the Account screen',
-    explainer: `<p>The final commit wires everything together. The <code>Avatar</code> component is now imported and rendered at the top of the Account screen. The <code>onUpload</code> callback is what connects avatar upload back to the profile — when the Avatar component finishes uploading the image to Storage, it calls <code>onUpload(url)</code> which:</p>
+    explainer: `<p>KEY ACTION: Integrate the Avatar component into the Account screen</p><p>The final commit wires everything together. The <code>Avatar</code> component is now imported and rendered at the top of the Account screen. The <code>onUpload</code> callback is what connects avatar upload back to the profile — when the Avatar component finishes uploading the image to Storage, it calls <code>onUpload(url)</code> which:</p>
 <ol style="padding-left:18px;margin-top:8px;line-height:1.8;">
   <li>Updates local state (<code>setAvatarUrl(url)</code>) so the UI reflects the new image immediately</li>
   <li>Calls <code>updateProfile({ username, website, avatar_url: url })</code> to persist the new path to the database</li>
@@ -893,6 +900,7 @@ const slides = [
   <li>Tap the avatar area and pick a photo from your library</li>
   <li>Sign out, then sign back in — verify all profile details persist</li>
   <li>Check the <strong>profiles</strong> table in the Supabase dashboard to confirm the row updated</li>
+  <li>Check the storage bucket in the Supabase dashboard to confirm the avatar file uploaded</li>
 </ul>` },
     ],
     files: [
@@ -981,6 +989,7 @@ function buildSlides() {
           ${calloutsHtml}
         </div>
         <div class="slide-right">
+          <h2 style="margin-bottom: 10px;">Sample Code Snippet</h2><p style="margin-bottom: 20px;">Grab full code from the commit link: <a class="slide-sha" href="${REPO}${s.shaFull}" target="_blank" rel="noopener">${s.sha}</a></p>
           ${diffsHtml}
         </div>
       </div>`;
